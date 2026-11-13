@@ -34,7 +34,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 /* ── Theme switch button ── */
 .theme-switch {
   position: fixed;
-  top: 14px; right: 14px;
+  top: 14px; left: 14px;
   z-index: 99999;
   width: 40px; height: 40px;
   border-radius: 50%;
@@ -47,6 +47,17 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   transition: border-color .15s, transform .12s;
 }
 .theme-switch:hover { border-color: var(--ac); transform: scale(1.1) rotate(15deg); }
+
+/* ── Hide scrollbar everywhere ── */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
 
 /* ── Chat ── */
 .chat-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
@@ -77,3 +88,69 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .route-info{background:var(--card);padding:10px 12px;border-radius:10px;font-size:.85rem}
 .active-pick{border-color:var(--ac);color:var(--ac)}
 .mut{color:var(--mut)}
+
+/* ── Direction picker (AI) ── */
+.dir-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+}
+.dir-label {
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.dir-ai-hint {
+  font-size: .78rem;
+  color: var(--ac);
+  font-weight: 700;
+}
+.dir-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+}
+.dir-btn {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  border: 2px solid var(--border);
+  background: var(--card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color .15s, background .15s, color .15s, transform .1s;
+}
+.dir-btn:hover { border-color: var(--ac); color: var(--ac); }
+.dir-btn:active { transform: scale(0.95); }
+.dir-btn-active {
+  border-color: var(--ac) !important;
+  background: var(--ac) !important;
+  color: #fff !important;
+}
+.dir-or {
+  font-size: .78rem;
+  color: var(--text-muted);
+}
+.dir-compass {
+  font-size: .72rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+.dir-badge {
+  display: inline-block;
+  font-size: .72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--ac);
+  color: #fff;
+  margin-left: 6px;
+}

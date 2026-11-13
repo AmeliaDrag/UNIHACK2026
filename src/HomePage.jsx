@@ -175,7 +175,7 @@ export default function App() {
   const nav = (p) => setPage(p);
 
   return (
-    <AppShell title={titles[page] || 'LadyMap'} active={page} onNav={nav} showFab={true}>
+    <AppShell title={titles[page] || 'LadyMap'} active={page} onNav={nav} showFab={page !== 'reports'}>
       {page === 'reports' && secure(<ReportsPage uid={uid} isMod={isMod} reports={reports} pos={pos} reload={reload} />)}
       {page === 'share'   && secure(<SharePage uid={uid} pos={pos} />)}
       {page === 'chat'    && secure(<ChatPage uid={uid} userName={name} />)}

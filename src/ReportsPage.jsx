@@ -1,10 +1,20 @@
 import { useEffect, useState } from 'react';
 import { api } from './api';
 
-const CATS = ['Iluminat slab', 'Persoană suspectă', 'Zonă izolată', 'Drum degradat', 'Altele'];
+const CATS = ['Poor lighting', 'Suspicious person', 'Isolated area', 'Damaged road', 'Other'];
+// Categories that need a direction indicator
+const NEEDS_DIRECTION = ['Suspicious person', 'Isolated area'];
 const OK = 3;
 
-// Mică buburuză pentru lista de prieteni
+// ── AI direction helper ─────────────────────────────────────────────────────
+// Uses the device compass heading to suggest which way the suspect is moving.
+// Heading 0-180 = generally east/right, 180-360 = generally west/left.
+// Returns 'left' | 'right' | null
+function suggestDirection(heading) {
+  if (heading === null || heading === undefined || isNaN(heading)) return null;
+  return heading < 180 ? 'right' : 'left';
+}
+
 function MiniBug({ size = 20 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
@@ -19,12 +29,35 @@ function MiniBug({ size = 20 }) {
   );
 }
 
-export default function ReportsPage({ uid, isMod, reports, pos, reload }) {
-  const [cat, setCat]   = useState(CATS[0]);
-  const [text, setText] = useState('');
-  const [anon, setAnon] = useState(false);
+// ── Arrow icon for direction ────────────────────────────────────────────────
+function ArrowButton({ dir, active, onClick, label }) {
+  return (
+    <button
+      className={`dir-btn${active ? ' dir-btn-active' : ''}`}
+      onClick={onClick}
+      aria-label={label}
+    >
+      {dir === 'left' ? (
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <path d="M18 6 L8 14 L18 22" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+        </svg>
+      ) : (
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <path d="M10 6 L20 14 L10 22" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+        </svg>
+      )}
+    </button>
+  );
+}
 
-  // Prieteni
+export default function ReportsPage({ uid, isMod, reports, pos, reload }) {
+  const [cat, setCat]     = useState(CATS[0]);
+  const [text, setText]   = useState('');
+  const [anon, setAnon]   = useState(false);
+  const [direction, setDirection] = useState(null);  // 'left' | 'right' | null
+  const [aiSuggestion, setAiSuggestion] = useState(null);
+
+  // Friends
   const [friends, setFriends] = useState([]);
   const [fName, setFName] = useState('');
   const [fPhone, setFPhone] = useState('');
@@ -32,8 +65,22 @@ export default function ReportsPage({ uid, isMod, reports, pos, reload }) {
   const loadFriends = () => api.listFriends(uid).then(setFriends).catch(() => {});
   useEffect(() => { loadFriends(); }, [uid]);
 
+  // ── AI: auto-suggest direction when GPS heading is available ──
+  useEffect(() => {
+    if (!NEEDS_DIRECTION.includes(cat)) {
+      setDirection(null);
+      setAiSuggestion(null);
+      return;
+    }
+    const suggested = suggestDirection(pos?.heading);
+    if (suggested && !direction) {
+      setDirection(suggested);
+      setAiSuggestion(suggested);
+    }
+  }, [cat, pos?.heading]);
+
   const addFriend = async () => {
-    if (!fName.trim()) return alert('Introdu numele prietenei.');
+    if (!fName.trim()) return alert('Enter a friend name.');
     try {
       await api.addFriend({ uid, name: fName.trim(), phone: fPhone.trim() || null });
       setFName(''); setFPhone('');
@@ -51,19 +98,32 @@ export default function ReportsPage({ uid, isMod, reports, pos, reload }) {
   };
 
   const send = () => {
-    if (!pos) return alert('Activează locația ca să poți raporta.');
+    if (!pos) return alert('Enable location to report.');
+    if (NEEDS_DIRECTION.includes(cat) && !direction) {
+      return alert('Please select the direction the suspect is moving.');
+    }
     act(async () => {
-      await api.addReport({ category: cat, text: text.trim(), lat: pos.lat, lng: pos.lng, author: anon ? null : uid });
+      await api.addReport({
+        category: cat,
+        text: text.trim(),
+        lat: pos.lat, lng: pos.lng,
+        author: anon ? null : uid,
+        direction: NEEDS_DIRECTION.includes(cat) ? direction : null,
+      });
       setText('');
+      setDirection(null);
+      setAiSuggestion(null);
     });
   };
+
+  const showDirection = NEEDS_DIRECTION.includes(cat);
 
   return (
     <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
       {/* ── Report ── */}
       <div className="lb-section">
         <h2 className="lb-section-title">Report a problem</h2>
-        <select className="lb-input" value={cat} onChange={(e) => setCat(e.target.value)}>
+        <select className="lb-input" value={cat} onChange={(e) => { setCat(e.target.value); setDirection(null); setAiSuggestion(null); }}>
           {CATS.map((c) => <option key={c}>{c}</option>)}
         </select>
         <textarea
@@ -73,6 +133,31 @@ export default function ReportsPage({ uid, isMod, reports, pos, reload }) {
           onChange={(e) => setText(e.target.value)}
           rows={3}
         />
+
+        {/* ── AI Direction Picker ── */}
+        {showDirection && (
+          <div className="dir-picker">
+            <div className="dir-label">
+              🤖 Which way is the suspect moving?
+              {aiSuggestion && (
+                <span className="dir-ai-hint">
+                  AI suggests: {aiSuggestion === 'left' ? '⬅ left' : 'right ➡'}
+                </span>
+              )}
+            </div>
+            <div className="dir-buttons">
+              <ArrowButton dir="left" active={direction === 'left'} onClick={() => setDirection('left')} label="Moving left" />
+              <span className="dir-or">or</span>
+              <ArrowButton dir="right" active={direction === 'right'} onClick={() => setDirection('right')} label="Moving right" />
+            </div>
+            {pos?.heading != null && !isNaN(pos?.heading) && (
+              <small className="dir-compass">
+                🧭 Compass: {Math.round(pos.heading)}°
+              </small>
+            )}
+          </div>
+        )}
+
         <label className="lb-check">
           <input type="checkbox" checked={anon} onChange={(e) => setAnon(e.target.checked)} />
           Report anonymously
@@ -100,19 +185,8 @@ export default function ReportsPage({ uid, isMod, reports, pos, reload }) {
         </div>
 
         <div className="lb-friend-add">
-          <input
-            className="lb-input"
-            placeholder="Name"
-            value={fName}
-            onChange={(e) => setFName(e.target.value)}
-          />
-          <input
-            className="lb-input"
-            placeholder="Phone (optional)"
-            inputMode="tel"
-            value={fPhone}
-            onChange={(e) => setFPhone(e.target.value)}
-          />
+          <input className="lb-input" placeholder="Name" value={fName} onChange={(e) => setFName(e.target.value)} />
+          <input className="lb-input" placeholder="Phone (optional)" inputMode="tel" value={fPhone} onChange={(e) => setFPhone(e.target.value)} />
           <button className="lb-btn" onClick={addFriend}>＋ Add friend</button>
         </div>
       </div>
@@ -126,6 +200,11 @@ export default function ReportsPage({ uid, isMod, reports, pos, reload }) {
           return (
             <div className="lb-card" key={r.id}>
               <b>{r.category}</b> {r.status === 'resolved' ? '(resolved)' : n >= OK ? '(confirmed)' : ''}
+              {r.direction && (
+                <span className="dir-badge">
+                  {r.direction === 'left' ? '⬅ moving left' : 'moving right ➡'}
+                </span>
+              )}
               <p>{r.text}</p>
               <small>{n}/{OK} confirmations</small><br />
               {r.status !== 'resolved' && !r.confirmations?.includes(uid) && (

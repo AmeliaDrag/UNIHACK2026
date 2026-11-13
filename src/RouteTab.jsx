@@ -41,8 +41,31 @@ function makeLadybugIcon(color = '#c62828') {
   });
 }
 
-const iconFrom = makeLadybugIcon('#c62828'); // roșu — plecare
-const iconTo   = makeLadybugIcon('#111');    // negru — destinație
+const iconFrom = makeLadybugIcon('#c62828'); // red — start
+const iconTo   = makeLadybugIcon('#111');    // black — destination
+
+// ── Arrow marker for suspect direction ──────────────────────────────────────
+const arrowSvg = (direction) => {
+  const rot = direction === 'left' ? 180 : 0;
+  return `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 48" width="40" height="48">
+  <ellipse cx="20" cy="46" rx="6" ry="2.5" fill="rgba(0,0,0,.3)"/>
+  <circle cx="20" cy="24" r="18" fill="#ff4444" stroke="#111" stroke-width="2"/>
+  <g transform="rotate(${rot} 20 24)">
+    <path d="M10 24 L24 14 L24 20 L32 20 L32 28 L24 28 L24 34 Z" fill="#111"/>
+  </g>
+</svg>`;
+};
+
+function makeArrowIcon(direction) {
+  return L.divIcon({
+    html: arrowSvg(direction),
+    className: '',
+    iconSize: [40, 48],
+    iconAnchor: [20, 46],
+    popupAnchor: [0, -46],
+  });
+}
 
 const ORS_KEY = import.meta.env.VITE_ORS_KEY;
 
@@ -90,7 +113,7 @@ function FlyTo({ point }) {
   return null;
 }
 
-export default function RouteTab({ userPos }) {
+export default function RouteTab({ userPos, reports = [] }) {
   const [open, setOpen]         = useState(false);
   const [from, setFrom]         = useState(null);
   const [to, setTo]             = useState(null);
@@ -162,6 +185,23 @@ export default function RouteTab({ userPos }) {
         {from  && <Marker position={[from.lat, from.lng]} icon={iconFrom} />}
         {to    && <Marker position={[to.lat,   to.lng]}   icon={iconTo}   />}
         {route && <Polyline positions={route.map(p => [p.lat, p.lng])} pathOptions={{ color: '#c62828', weight: 4 }} />}
+
+        {/* ── Report markers with direction arrows ── */}
+        {reports
+          .filter((r) => r.status !== 'resolved' && r.lat && r.direction)
+          .map((r) => (
+            <Marker
+              key={r.id}
+              position={[r.lat, r.lng]}
+              icon={makeArrowIcon(r.direction)}
+            >
+              <Popup>
+                <b>{r.category}</b><br />
+                {r.direction === 'left' ? '⬅ Moving left' : 'Moving right ➡'}<br />
+                {r.text}
+              </Popup>
+            </Marker>
+          ))}
       </MapContainer>
 
       {/* ── Overlay sus: titlu + toggle ── */}
