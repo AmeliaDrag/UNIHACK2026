@@ -33,17 +33,17 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 
 /* ── Theme switch button ── */
 .theme-switch {
-  position: absolute;
-  top: 10px; right: 10px;
-  z-index: 9999;
-  width: 38px; height: 38px;
+  position: fixed;
+  top: 14px; right: 14px;
+  z-index: 99999;
+  width: 40px; height: 40px;
   border-radius: 50%;
   border: 1.5px solid var(--border);
   background: var(--card);
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,.2);
+  box-shadow: 0 2px 10px rgba(0,0,0,.3);
   transition: border-color .15s, transform .12s;
 }
 .theme-switch:hover { border-color: var(--ac); transform: scale(1.1) rotate(15deg); }
