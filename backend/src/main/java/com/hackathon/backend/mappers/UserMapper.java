@@ -1,7 +1,6 @@
 package com.hackathon.backend.mappers;
 
 
-import com.hackathon.backend.model.dtos.*;
 import com.hackathon.backend.model.dtos.users.UserCreateDTO;
 import com.hackathon.backend.model.dtos.users.UserReadDTO;
 import com.hackathon.backend.model.dtos.users.UserUpdateDTO;

@@ -1,5 +1,4 @@
 package com.hackathon.backend.mappers;
-import com.hackathon.backend.model.dtos.*;
 import com.hackathon.backend.model.dtos.reports.ReportCreateDTO;
 import com.hackathon.backend.model.dtos.reports.ReportReadDTO;
 import com.hackathon.backend.model.entities.*;

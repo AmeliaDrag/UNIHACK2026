@@ -1,7 +1,5 @@
 package com.hackathon.backend.mappers;
 
-import com.hackathon.backend.model.SosAlertStatus;
-import com.hackathon.backend.model.dtos.*;
 import com.hackathon.backend.model.dtos.sosAlerts.SosAlertCreateDTO;
 import com.hackathon.backend.model.dtos.sosAlerts.SosAlertReadDTO;
 import com.hackathon.backend.model.entities.*;
