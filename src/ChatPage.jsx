@@ -22,7 +22,7 @@ export default function ChatPage({ uid, userName }) {
         lastTs.current = data[data.length - 1].createdAt;
         setError(null);
       }
-    } catch { setError('Conexiunea cu serverul a eșuat. Se reîncearcă…'); }
+    } catch { setError('Server connection failed. Retrying…'); }
   }, []);
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export default function ChatPage({ uid, userName }) {
     try {
       await api.sendMessage({ room: ROOM, authorId: uid, authorName: userName, text: trimmed });
       await fetchMessages();
-    } catch (e) { alert('Mesajul nu a putut fi trimis: ' + e.message); setText(trimmed); }
+    } catch (e) { alert('Message could not be sent: ' + e.message); setText(trimmed); }
   };
 
   const onKey = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } };

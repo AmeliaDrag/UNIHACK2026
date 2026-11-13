@@ -35,10 +35,24 @@ function ConfigError({ missing }) {
  * Pe desktop (>600px lățime) învelește aplicația într-un cadru de telefon.
  * Pe un telefon real ocupă tot ecranul — cadrul dispare.
  */
+import { useState } from 'react';
+
+const VIEW_KEY = 'sf-view-mode';
+
 function PhoneFrame({ children }) {
+  const [mode, setMode] = useState(() => {
+    try { return localStorage.getItem(VIEW_KEY) || 'phone'; }
+    catch { return 'phone'; }
+  });
+
+  const toggle = () => {
+    const next = mode === 'phone' ? 'desktop' : 'phone';
+    setMode(next);
+    try { localStorage.setItem(VIEW_KEY, next); } catch {}
+  };
+
   return (
     <>
-      {/* Stiluri inline ca să nu depindă de ordinea încărcării CSS */}
       <style>{`
         .sf-desktop {
           min-height: 100vh;
@@ -54,14 +68,10 @@ function PhoneFrame({ children }) {
           height: 844px;
           background: #000;
           border-radius: 50px;
-          box-shadow:
-            0 0 0 2px #333,
-            0 0 0 6px #111,
-            0 30px 80px rgba(0,0,0,.7);
+          box-shadow: 0 0 0 2px #333, 0 0 0 6px #111, 0 30px 80px rgba(0,0,0,.7);
           overflow: hidden;
           flex-shrink: 0;
         }
-        /* Notch */
         .sf-frame::before {
           content: '';
           position: absolute;
@@ -72,7 +82,6 @@ function PhoneFrame({ children }) {
           border-radius: 0 0 20px 20px;
           z-index: 9999;
         }
-        /* Side buttons */
         .sf-frame::after {
           content: '';
           position: absolute;
@@ -82,36 +91,60 @@ function PhoneFrame({ children }) {
           border-radius: 0 3px 3px 0;
           box-shadow: 0 80px 0 #333, 0 -80px 0 #333;
         }
-        .sf-screen {
-          width: 100%;
-          height: 100%;
-          overflow: hidden;
-          border-radius: 44px;
+        .sf-screen { width: 100%; height: 100%; overflow: hidden; border-radius: 44px; }
+
+        /* ── Modul Desktop: fără cadru, pe tot ecranul ── */
+        .sf-desktop.is-desktop {
+          background: none;
+          padding: 0;
+          display: block;
+          min-height: unset;
         }
-        /* Pe telefon real — niciun cadru */
+        .is-desktop .sf-frame {
+          width: 100vw;
+          height: 100dvh;
+          border-radius: 0;
+          box-shadow: none;
+        }
+        .is-desktop .sf-frame::before,
+        .is-desktop .sf-frame::after { display: none; }
+        .is-desktop .sf-screen { border-radius: 0; }
+
+        /* Pe telefon real: mereu pe tot ecranul, fără buton */
         @media (max-width: 600px) {
-          .sf-desktop {
-            background: none;
-            padding: 0;
-            display: block;
-            min-height: unset;
-          }
-          .sf-frame {
-            width: 100vw;
-            height: 100dvh;
-            border-radius: 0;
-            box-shadow: none;
-          }
-          .sf-frame::before,
-          .sf-frame::after { display: none; }
+          .sf-desktop { background: none; padding: 0; display: block; min-height: unset; }
+          .sf-frame { width: 100vw; height: 100dvh; border-radius: 0; box-shadow: none; }
+          .sf-frame::before, .sf-frame::after { display: none; }
           .sf-screen { border-radius: 0; }
+          .sf-view-toggle { display: none !important; }
         }
+
+        /* Butonul de schimbare */
+        .sf-view-toggle {
+          position: fixed;
+          top: 12px; right: 12px;
+          z-index: 99999;
+          padding: 8px 14px;
+          border: 0; border-radius: 999px;
+          background: #c62828; color: #fff;
+          font: 600 .85rem system-ui, sans-serif;
+          cursor: pointer;
+          box-shadow: 0 2px 10px rgba(0,0,0,.4);
+        }
+        .sf-view-toggle:hover { background: #e53935; }
       `}</style>
-      <div className="sf-desktop">
+
+      <button
+        className="sf-view-toggle"
+        onClick={toggle}
+        aria-label="Schimbă aspectul"
+      >
+        {mode === 'phone' ? '🖥 Desktop' : '📱 Telefon'}
+      </button>
+
+      <div className={`sf-desktop ${mode === 'desktop' ? 'is-desktop' : ''}`}>
         <div className="sf-frame">
-          <div className="sf-screen">
-            {children}
-          </div>
+          <div className="sf-screen">{children}</div>
         </div>
       </div>
     </>

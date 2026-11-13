@@ -106,4 +106,14 @@ export const api = {
 
   sendMessage: (msg) =>
     post('/messages', { ...msg, createdAt: Date.now() }),
+
+  // ── Friends ────────────────────────────────────────────────────────────────
+  listFriends: (uid) =>
+    get(`/friends?uid=${encodeURIComponent(uid)}`),
+
+  addFriend: (f) =>
+    post('/friends', { ...f, createdAt: Date.now() }),
+
+  removeFriend: (id) =>
+    del(`/friends/${id}`),
 };

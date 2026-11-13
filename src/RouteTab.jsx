@@ -104,10 +104,9 @@ export default function RouteTab({ userPos }) {
   const closePanel = () => setOpen(false);
 
   const useMyLocation = () => {
-    if (!userPos) return alert('Locația GPS nu este disponibilă încă.');
-    setFrom({ ...userPos, label: 'Locația mea' });
+    if (!userPos) return alert('GPS location not available yet.');
+    setFrom({ ...userPos, label: 'My location' });
     setRoute(null);
-    // nu închidem panoul — userul mai trebuie să completeze destinația
   };
 
   const handleMapPick = async (latlng) => {
@@ -168,7 +167,7 @@ export default function RouteTab({ userPos }) {
       {/* ── Overlay sus: titlu + toggle ── */}
       <div className="rt-top">
         <button className="rt-toggle" onClick={() => setOpen(o => !o)}>
-          <span className="rt-title">LadyApp</span>
+          <span className="rt-title">LadyMap</span>
           <span className="rt-arrow">{open ? '▲' : '▼'}</span>
         </button>
 
@@ -179,13 +178,13 @@ export default function RouteTab({ userPos }) {
           <div className="rt-row">
             <span className="rt-dot" />
             <div className="rt-field">
-              <div className="rt-val">{from ? from.label : <span className="rt-ph">Plecare…</span>}</div>
+              <div className="rt-val">{from ? from.label : <span className="rt-ph">From…</span>}</div>
               <div className="rt-actions">
-                <button className="g" onClick={useMyLocation}>📍 Locația mea</button>
+                <button className="g" onClick={useMyLocation}>📍 My location</button>
                 <button
                   className={`g${pickMode === 'from' ? ' active-pick' : ''}`}
                   onClick={() => setPickMode(pickMode === 'from' ? null : 'from')}
-                >🗺 Hartă</button>
+                >🗺 On map</button>
                 {from && <button className="g" onClick={() => { setFrom(null); setRoute(null); }}>✕</button>}
               </div>
             </div>
@@ -200,7 +199,7 @@ export default function RouteTab({ userPos }) {
             <div className="rt-field">
               <input
                 className="rt-input"
-                placeholder="Destinație…"
+                placeholder="Destination…"
                 value={toInput}
                 onChange={(e) => { setToInput(e.target.value); setTo(null); setRoute(null); }}
                 onBlur={resolveDestination}
@@ -210,7 +209,7 @@ export default function RouteTab({ userPos }) {
                 <button
                   className={`g${pickMode === 'to' ? ' active-pick' : ''}`}
                   onClick={() => setPickMode(pickMode === 'to' ? null : 'to')}
-                >🗺 Hartă</button>
+                >🗺 On map</button>
                 {to && <button className="g" onClick={() => { setTo(null); setToInput(''); setRoute(null); }}>✕</button>}
               </div>
             </div>
@@ -218,7 +217,7 @@ export default function RouteTab({ userPos }) {
 
           {pickMode && (
             <div className="rt-hint">
-              Apasă pe hartă — {pickMode === 'from' ? 'plecare' : 'destinație'}
+              Tap the map — {pickMode === 'from' ? 'start point' : 'destination'}
               <button className="g" onClick={() => setPickMode(null)} style={{ marginLeft: 8 }}>✕</button>
             </div>
           )}
@@ -228,7 +227,7 @@ export default function RouteTab({ userPos }) {
 
           <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
             <button className="b" onClick={calculate} disabled={loading} style={{ flex: 1 }}>
-              {loading ? 'Se calculează…' : 'Găsește ruta'}
+              {loading ? 'Calculating…' : 'Find route'}
             </button>
             <button className="g" onClick={reset}>↺</button>
           </div>

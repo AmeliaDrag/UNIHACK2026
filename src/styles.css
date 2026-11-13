@@ -1,5 +1,19 @@
-:root{--bg:#f6f7fb;--fg:#14162b;--mut:#6a6d85;--card:#e9ebf4;--ac:#c62828;--ac2:#111;--red:#c62828;color-scheme:light dark}
-@media(prefers-color-scheme:dark){:root{--bg:#10111f;--fg:#eceefb;--mut:#9a9db8;--card:#1c1e33;--ac:#ef5350;--ac2:#fff;--red:#ef5350}}
+/* ═══ Themes ═══ */
+:root, [data-theme="dark"] {
+  --bg:#10111f;--fg:#eceefb;--mut:#9a9db8;--card:#1c1e33;--ac:#c62828;--ac2:#fff;--red:#ef5350;
+  --bg-panel:#1a1a2e;--bg-card:#1c1e33;--text-primary:#eceefb;--text-secondary:#9a9db8;
+  --border:#333;--border-strong:#000;
+}
+[data-theme="light"] {
+  --bg:#f6f7fb;--fg:#14162b;--mut:#6a6d85;--card:#e9ebf4;--ac:#dc2626;--ac2:#111;--red:#c62828;
+  --bg-panel:#fff;--bg-card:#f4f4f5;--text-primary:#18181b;--text-secondary:#52525b;
+  --border:#e4e4e7;--border-strong:#18181b;
+}
+[data-theme="pink"] {
+  --bg:#fce4ec;--fg:#1a0010;--mut:#c2185b;--card:#ffd6e7;--ac:#c2185b;--ac2:#880e4f;--red:#e91e63;
+  --bg-panel:#fff0f5;--bg-card:#ffd6e7;--text-primary:#1a0010;--text-secondary:#6d2042;
+  --border:#f48fb1;--border-strong:#880e4f;
+}
 *{box-sizing:border-box}html,body,#root{height:100%;margin:0}
 body{background:var(--bg);color:var(--fg);font:16px/1.45 system-ui,sans-serif}
 .app{display:flex;flex-direction:column;height:100%;margin:0 auto;padding-top:env(safe-area-inset-top)}
@@ -16,6 +30,23 @@ input,select,textarea{font:inherit;padding:10px;border-radius:10px;border:1px so
 .sos{width:200px;height:200px;border-radius:50%;border:0;background:var(--red);color:#fff;font-size:44px;font-weight:700;margin:24px auto;display:block}
 .big{font-size:96px;text-align:center}.c,.login{display:grid;place-items:center;align-content:center;gap:12px;height:100%;text-align:center;padding:24px}
 button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+
+/* ── Theme switch button ── */
+.theme-switch {
+  position: absolute;
+  top: 10px; right: 10px;
+  z-index: 9999;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,.2);
+  transition: border-color .15s, transform .12s;
+}
+.theme-switch:hover { border-color: var(--ac); transform: scale(1.1) rotate(15deg); }
 
 /* ── Chat ── */
 .chat-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
