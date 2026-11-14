@@ -620,3 +620,33 @@ Clarifications versus existing setup narratives:
 - Never promise safety, guaranteed delivery or emergency response.
 - Adapt mismatches to this contract; ask owner only about UNKNOWN items or unresolved ambiguity.
 
+
+## 9. OpenStreetMap 24/7 places
+
+### GET /api/v1/places/open-24-7
+
+No parameters or request body. In auth mode send the same Bearer access token as for other endpoints; missing/invalid tokens return the existing standardized 401. In dev no token is required. Existing CORS behavior is unchanged.
+
+200 returns a bare JSON array, not an envelope. Fields: id (string OSM type/id), name (string or null), latitude/longitude (finite numbers), category (string from OSM tags, not an enum). shop takes priority over amenity=pharmacy/fuel. Only opening_hours exactly 24/7 is included. Duplicate type/id values and malformed individual elements are filtered. Unnamed places remain present with name:null. Frontend chooses icons and must provide an icon fallback for unexpected category strings.
+
+Real example from the supplied snapshot (only the API fields):
+
+```json
+[
+  {
+    "id": "node/265555548",
+    "name": "Petrom",
+    "latitude": 45.7527997,
+    "longitude": 21.2548194,
+    "category": "fuel"
+  }
+]
+```
+
+This is an excerpt, not the entire response. Locations are loaded once from the local snapshot into memory; GET makes no external calls. Team updates require replacing the snapshot and restarting the backend. There is no refresh endpoint.
+
+A valid snapshot with no matching places returns []. A missing, unreadable, malformed JSON, or structurally invalid snapshot does NOT stop the backend. It logs a clear error and this endpoint returns 503 using the standard error object, with exact message `24/7 places snapshot is unavailable`. It never silently substitutes [] for such a snapshot. Other endpoints remain available. Frontend should show places as temporarily unavailable on 503, while keeping the rest of the map usable.
+
+Show markers as **“Program 24/7 conform OpenStreetMap”**, not “open now”; this is neither verified current opening status nor a safety guarantee. Show visible attribution **© OpenStreetMap contributors** and respect the ODbL license. No route selection or avoidance behavior is changed by these places.
+
+Documented intended demo bbox: south 45.69, west 21.14, north 45.80, east 21.29 (Timisoara vicinity), not an administrative boundary. The raw export does not prove which query/bbox was used; the team must confirm the export area. Any osm3s.timestamp_osm_base describes the OSM data state, not physical opening-hours verification or necessarily download time. No fetchedAt is exposed.

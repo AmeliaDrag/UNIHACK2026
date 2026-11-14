@@ -1,0 +1,1428 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62.11 87bfad18",
+  "osm3s": {
+    "timestamp_osm_base": "2026-11-14T15:51:35Z",
+    "timestamp_areas_base": "2026-11-14T11:52:42Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+
+{
+  "type": "node",
+  "id": 265555548,
+  "lat": 45.7527997,
+  "lon": 21.2548194,
+  "tags": {
+    "amenity": "fuel",
+    "brand": "Petrom",
+    "brand:wikidata": "Q1755034",
+    "compressed_air": "no",
+    "name": "Petrom",
+    "opening_hours": "24/7"
+  }
+},
+{
+  "type": "node",
+  "id": 1264076923,
+  "lat": 45.7656277,
+  "lon": 21.2602816,
+  "tags": {
+    "addr:city": "Timișoara",
+    "addr:housenumber": "79",
+    "addr:street": "Bulevardul Simion Bărnuțiu",
+    "amenity": "pharmacy",
+    "brand": "Farmacia Dona",
+    "brand:wikidata": "Q12726919",
+    "drive_through": "no",
+    "healthcare": "pharmacy",
+    "name": "Farmacia Dona",
+    "opening_hours": "24/7",
+    "operator": "Farmacia Dona / Siepcofar",
+    "phone": "+40 372 407 140",
+    "website": "https://www.farmaciiledona.ro/"
+  }
+},
+{
+  "type": "node",
+  "id": 2237174599,
+  "lat": 45.7403897,
+  "lon": 21.2112107,
+  "tags": {
+    "addr:city": "Timișoara",
+    "addr:housenumber": "51",
+    "addr:street": "Bulevardul 16 Decembrie 1989",
+    "amenity": "pharmacy",
+    "drive_through": "no",
+    "healthcare": "pharmacy",
+    "name": "Farmacia Vlad",
+    "opening_hours": "24/7"
+  }
+},
+{
+  "type": "node",
+  "id": 2494514130,
+  "lat": 45.7452688,
+  "lon": 21.2137341,
+  "tags": {
+    "name": "Dydy",
+    "opening_hours": "24/7",
+    "shop": "convenience"
+  }
+},
+{
+  "type": "node",
+  "id": 3191762883,
+  "lat": 45.7321384,
+  "lon": 21.2595399,
+  "tags": {
+    "addr:city": "Timișoara",
+    "addr:housenumber": "1",
+    "addr:postcode": "300714",
+    "addr:postcode:source": "Date de la Poșta Română, publicate sub Licența pentru Guvernare Deschisă v1.0 la http://date.gov.ro/organization/posta-romana",
+    "addr:street": "Calea Buziașului",
+    "amenity": "pharmacy",
+    "brand": "Help Net",
+    "brand:wikidata": "Q12729923",
+    "drive_through": "no",
+    "healthcare": "pharmacy",
+    "name": "Help Net",
+    "opening_hours": "24/7",
+    "operator": "HelpNet"
+  }
+},
+{
+  "type": "node",
+  "id": 4282920368,
+  "lat": 45.7776330,
+  "lon": 21.2343111,
+  "tags": {
+    "addr:city": "Timișoara",
+    "addr:housenumber": "82",
+    "addr:postcode": "300253",
+    "addr:postcode:source": "Date de la Poșta Română, publicate sub Licența pentru Guvernare Deschisă v1.0 la http://date.gov.ro/organization/posta-romana",
+    "addr:street": "Calea Sever Bocu",
+    "amenity": "pharmacy",
+    "brand": "Farmacia Dona",
+    "brand:wikidata": "Q12726919",
+    "drive_through": "no",
+    "healthcare": "pharmacy",
+    "name": "Farmacia Dona",
+    "opening_hours": "24/7",
+    "operator": "Farmacia Dona",
+    "phone": "+40 372 407 139",
+    "website": "https://www.farmaciiledona.ro/"
+  }
+},
+{
+  "type": "node",
+  "id": 4436702423,
+  "lat": 45.7670208,
+  "lon": 21.1948272,
+  "tags": {
+    "brand": "Profi",
+    "brand:wikidata": "Q956664",
+    "contact:email": "contact@profi.ro",
+    "contact:facebook": "https://www.facebook.com/Profi.ro",
+    "contact:instagram": "https://www.instagram.com/profi.ro",
+    "contact:phone": "+40 736 622 773;+40 736 622 774",
+    "contact:website": "https://www.profi.ro/",
+    "contact:youtube": "https://www.youtube.com/user/magazineleprofi",
+    "name": "Profi",
+    "opening_hours": "24/7",
+    "operator": "Profi Rom Food",
+    "shop": "supermarket"
+  }
+},
+{
+  "type": "node",
+  "id": 4523136970,
+  "lat": 45.7625564,
+  "lon": 21.2114739,
+  "tags": {
+    "addr:city": "Timișoara",
+    "addr:housenumber": "33",
+    "addr:street": "Strada Gheorghe Lazăr",
+    "brand": "Profi",
+    "brand:wikidata": "Q956664",
+    "brand:wikipedia": "en:Profi",
+    "contact:email": "contact@profi.ro",
+    "contact:facebook": "https://www.facebook.com/Profi.ro",
+    "contact:instagram": "https://www.instagram.com/profi.ro",
+    "contact:phone": "+40 730 770 668;+40 730 770 679",
+    "contact:website": "https://www.profi.ro/",
+    "contact:youtube": "https://www.youtube.com/user/magazineleprofi",
+    "name": "Profi",
+    "opening_hours": "24/7",
+    "operator": "Profi Rom Food",
+    "shop": "supermarket"
+  }
+},
+{
+  "type": "node",
+  "id": 4734478337,
+  "lat": 45.7488254,
+  "lon": 21.2394972,
+  "tags": {
+    "brand": "Profi",
+    "brand:wikidata": "Q956664",
+    "brand:wikipedia": "en:Profi",
+    "check_date": "2025-04-09",
+    "contact:email": "contact@profi.ro",
+    "contact:facebook": "https://www.facebook.com/Profi.ro",
+    "contact:instagram": "https://www.instagram.com/profi.ro",
+    "contact:phone": "+40 730 770 199;+40 730 770 228",
+    "contact:website": "https://www.profi.ro/",
+    "contact:youtube": "https://www.youtube.com/user/magazineleprofi",
+    "name": "Profi",
+    "opening_hours": "24/7",
+    "operator": "Profi Rom Food",
+    "shop": "supermarket"
+  }
+},
+{
+  "type": "node",
+  "id": 4842279074,
+  "lat": 45.7504708,
+  "lon": 21.2067611,
+  "tags": {
+    "brand": "Profi",
+    "brand:wikidata": "Q956664",
+    "brand:wikipedia": "en:Profi",
+    "contact:email": "contact@profi.ro",
+    "contact:facebook": "https://www.facebook.com/Profi.ro",
+    "contact:instagram": "https://www.instagram.com/profi.ro",
+    "contact:phone": "+40 799 108 348;+40 799 108 349;+40 799 314 847",
+    "contact:website": "https://www.profi.ro/",
+    "contact:youtube": "https://www.youtube.com/user/magazineleprofi",
+    "name": "Profi",
+    "opening_hours": "24/7",
+    "operator": "Profi Rom Food",
+    "shop": "supermarket"
+  }
+},
+{
+  "type": "node",
+  "id": 5187124422,
+  "lat": 45.7753363,
+  "lon": 21.2399833,
+  "tags": {
+    "addr:city": "Timișoara",
+    "addr:housenumber": "27",
+    "addr:street": "Strada Sfinții Apostoli Petru și Pavel",
+    "brand": "Profi",
+    "brand:wikidata": "Q956664",
+    "contact:email": "contact@profi.ro",
+    "contact:facebook": "https://www.facebook.com/Profi.ro",
+    "contact:instagram": "https://www.instagram.com/profi.ro",
+    "contact:phone": "+40 738 743 899;+40 738 749 541;+40 799 910 359",
+    "contact:website": "https://www.profi.ro/",
+    "contact:youtube": "https://www.youtube.com/user/magazineleprofi",
+    "name": "Profi",
+    "opening_hours": "24/7",
+    "operator": "Profi Rom Food",
+    "payment:credit_cards": "yes",
+    "payment:debit_cards": "yes",
+    "shop": "supermarket"
+  }
+},
+{
+  "type": "node",
+  "id": 5195785923,
+  "lat": 45.7339215,
+  "lon": 21.1999562,
+  "tags": {
+    "brand": "Profi",
+    "brand:wikidata": "Q956664",
+    "brand:wikipedia": "en:Profi",
+    "contact:email": "contact@profi.ro",
+    "contact:facebook": "https://www.facebook.com/Profi.ro",
+    "contact:instagram": "https://www.instagram.com/profi.ro",
+    "contact:phone": "+40 738 006 698;+40 799 910 374",
+    "contact:website": "https://www.profi.ro/",
+    "contact:youtube": "https://www.youtube.com/user/magazineleprofi",
+    "name": "Profi",
+    "opening_hours": "24/7",
+    "operator": "Profi Rom Food",
+    "shop": "supermarket"
+  }
+},
+{
+  "type": "node",
+  "id": 5195796666,
+  "lat": 45.7606075,
+  "lon": 21.2175925,
+  "tags": {
+    "amenity": "pharmacy",
+    "brand": "Help Net",
+    "brand:wikidata": "Q12729923",
+    "check_date": "2025-05-03",
+    "healthcare": "pharmacy",
+    "name": "Help Net",
+    "opening_hours": "24/7"
+  }
+},
+{
+  "type": "node",
+  "id": 5197828879,
+  "lat": 45.7346390,
+  "lon": 21.2375476,
+  "tags": {
+    "addr:city": "Timișoara",
+    "addr:housenumber": "60",
+    "addr:street": "Calea Martirilor 1989",
+    "contact:facebook": "https://www.facebook.com/KaolaMarket/",
+    "name": "Kaola Market",
+    "opening_hours": "24/7",
+    "shop": "supermarket"
+  }
+},
+{
+  "type": "node",
+  "id": 5246889030,
+  "lat": 45.7318993,
+  "lon": 21.2284654,
+  "tags": {
+    "addr:city": "Timișoara",
+    "addr:housenumber": "70",
+    "addr:street": "Strada Mareșal Alexandru Averescu",
+    "brand": "Profi",
+    "brand:wikidata": "Q956664",
+    "brand:wikipedia": "en:Profi",
+    "contact:email": "contact@profi.ro",
+    "contact:facebook": "https://www.facebook.com/Profi.ro",
+    "contact:instagram": "https://www.instagram.com/profi.ro",
+    "contact:phone": "+40 799 307 525;+40 799 307 555",
+    "contact:website": "https://www.profi.ro/",
+    "contact:youtube": "https://www.youtube.com/user/magazineleprofi",
+    "name": "Profi",
+    "opening_hours": "24/7",
+    "operator": "Profi Rom Food",
+    "shop": "supermarket"
+  }
+},
+{
+  "type": "node",
+  "id": 6051385545,
+  "lat": 45.7638798,
+  "lon": 21.2809294,
+  "tags": {
+    "addr:city": "Ghiroda",
+    "addr:housenumber": "55B",
+    "addr:street": "Calea Ghirodei",
+    "brand": "Profi",
+    "brand:wikidata": "Q956664",
+    "contact:email": "contact@profi.ro",
+    "contact:facebook": "https://www.facebook.com/Profi.ro",
+    "contact:instagram": "https://www.instagram.com/profi.ro",
+    "contact:phone": "+40 738 099 450;+40 738 994 178;+40 738 994 408",
+    "contact:website": "https://www.profi.ro/",
+    "contact:youtube": "https://www.youtube.com/user/magazineleprofi",
+    "name": "Profi",
+    "opening_hours": "24/7",
+    "operator": "Profi Rom Food",
+    "shop": "supermarket"
+  }
+},
+{
+  "type": "node",
+  "id": 6079207793,
+  "lat": 45.7245424,
+  "lon": 21.2173094,
+  "tags": {
+    "addr:city": "Timișoara",
+    "addr:housenumber": "74",
+    "addr:street": "Strada Victor Hugo",
+    "brand": "Profi",
+    "brand:wikidata": "Q956664",
+    "brand:wikipedia": "en:Profi",
+    "contact:email": "contact@profi.ro",
+    "contact:facebook": "https://www.facebook.com/Profi.ro",
+    "contact:instagram": "https://www.instagram.com/profi.ro",
+    "contact:phone": "+40 799 307 533;+40 799 307 563",
+    "contact:website": "https://www.profi.ro/",
+    "contact:youtube": "https://www.youtube.com/user/magazineleprofi",
+    "name": "Profi Go",
+    "opening_hours": "24/7",
+    "operator": "Profi Rom Food",
+    "shop": "convenience"
+  }
+},
+{
+  "type": "node",
+  "id": 6320330473,
+  "lat": 45.7749098,
+  "lon": 21.2217555,
+  "tags": {
+    "brand": "Profi",
+    "brand:wikidata": "Q956664",
+    "brand:wikipedia": "en:Profi",
+    "check_date": "2025-05-03",
+    "contact:email": "contact@profi.ro",
+    "contact:facebook": "https://www.facebook.com/Profi.ro",
+    "contact:instagram": "https://www.instagram.com/profi.ro",
+    "contact:phone": "+40 799 940 252;+40 799 940 362",
+    "contact:website": "https://www.profi.ro/",
+    "contact:youtube": "https://www.youtube.com/user/magazineleprofi",
+    "name": "Profi",
+    "opening_hours": "24/7",
+    "operator": "Profi Rom Food",
+    "shop": "supermarket"
+  }
+},
+{
+  "type": "node",
+  "id": 6727189575,
+  "lat": 45.7508410,
+  "lon": 21.2074167,
+  "tags": {
+    "name": "CFR Călători - ghișeul 6",
+    "opening_hours": "24/7",
+    "operator": "CFR Călători",
+    "shop": "ticket"
+  }
+},
+{
+  "type": "node",
+  "id": 6927149032,
+  "lat": 45.7578000,
+  "lon": 21.2254258,
+  "tags": {
+    "amenity": "pharmacy",
+    "dispensing": "yes",
+    "healthcare": "pharmacy",
+    "name": "Farmacia Vlad",
+    "opening_hours": "24/7"
+  }
+},
+{
+  "type": "node",
+  "id": 7126071390,
+  "lat": 45.7509652,
+  "lon": 21.2080946,
+  "tags": {
+    "name": "CFR Călători - trafic internațional și intern",
+    "opening_hours": "24/7",
+    "operator": "CFR Călători",
+    "shop": "ticket"
+  }
+},
+{
+  "type": "node",
+  "id": 7126071391,
+  "lat": 45.7509355,
+  "lon": 21.2081068,
+  "tags": {
+    "name": "CFR Călători - ghișeul 2",
+    "opening_hours": "24/7",
+    "operator": "CFR Călători",
+    "shop": "ticket"
+  }
+},
+{
+  "type": "node",
+  "id": 7126071392,
+  "lat": 45.7509048,
+  "lon": 21.2081159,
+  "tags": {
+    "name": "CFR Călători - ghișeul 3",
+    "opening_hours": "24/7",
+    "operator": "CFR Călători",
+    "shop": "ticket"
+  }
+},
+{
+  "type": "node",
+  "id": 7126071393,
+  "lat": 45.7508718,
+  "lon": 21.2081276,
+  "tags": {
+    "name": "CFR Călători - ghișeul 4",
+    "opening_hours": "24/7",
+    "operator": "CFR Călători",
+    "shop": "ticket"
+  }
+},
+{
+  "type": "node",
+  "id": 7126071397,
+  "lat": 45.7507986,
+  "lon": 21.2074279,
+  "tags": {
+    "name": "CFR Călători - ghișeul 5",
+    "opening_hours": "24/7",
+    "operator": "CFR Călători",
+    "shop": "ticket"
+  }
+},
+{
+  "type": "node",
+  "id": 7126071398,
+  "lat": 45.7507558,
+  "lon": 21.2074402,
+  "tags": {
+    "name": "Astra Trans Carpatic",
+    "opening_hours": "24/7",
+    "operator": "Astra Trans Carpatic",
+    "shop": "ticket"
+  }
+},
+{
+  "type": "node",
+  "id": 7385730788,
+  "lat": 45.7538895,
+  "lon": 21.2245783,
+  "tags": {
+    "addr:city": "Timișoara",
+    "addr:housenumber": "4",
+    "addr:street": "Bulevardul Republicii",
+    "brand": "Mega Image",
+    "brand:wikidata": "Q6808085",
+    "brand:wikipedia": "en:Mega Image",
+    "check_date": "2023-08-27",
+    "name": "Mega Image",
+    "opening_hours": "24/7",
+    "shop": "supermarket"
+  }
+},
+{
+  "type": "node",
+  "id": 7385774341,
+  "lat": 45.7525515,
+  "lon": 21.2255791,
+  "tags": {
+    "name": "Central Market",
+    "opening_hours": "24/7",
+    "shop": "convenience"
+  }
+},
+{
+  "type": "node",
+  "id": 7553420977,
+  "lat": 45.7631554,
+  "lon": 21.2078687,
+  "tags": {
+    "addr:city": "Timișoara",
+    "addr:housenumber": "18",
+    "addr:street": "Strada Horia",
+    "brand": "Profi",
+    "brand:wikidata": "Q956664",
+    "brand:wikipedia": "en:Profi",
+    "check_date": "2025-05-09",
+    "contact:email": "contact@profi.ro",
+    "contact:facebook": "https://www.facebook.com/Profi.ro",
+    "contact:instagram": "https://www.instagram.com/profi.ro",
+    "contact:phone": "+40 742 202 251;+40 742 285 114",
+    "contact:website": "https://www.profi.ro/",
+    "contact:youtube": "https://www.youtube.com/user/magazineleprofi",
+    "name": "Profi",
+    "opening_hours": "24/7",
+    "operator": "Profi Rom Food",
+    "shop": "supermarket"
+  }
+},
+{
+  "type": "node",
+  "id": 9396798685,
+  "lat": 45.7254431,
+  "lon": 21.2840259,
+  "tags": {
+    "alt_name": "Rompetrol",
+    "amenity": "fuel",
+    "brand": "Rompetrol",
+    "brand:wikidata": "Q1788862",
+    "brand:wikipedia": "en:Rompetrol",
+    "contact:email": "infoline@rompetrol.com",
+    "contact:facebook": "https://www.facebook.com/Rompetrol.Romania",
+    "contact:instagram": "https://www.instagram.com/rompetrol",
+    "contact:phone": "+40 740 190 048",
+    "contact:tiktok": "https://www.tiktok.com/@rompetrol.romania",
+    "contact:website": "https://www.rompetrol.ro",
+    "name": "Rompetrol",
+    "name:ro": "Rompetrol",
+    "name:ru": "Rompetrol",
+    "opening_hours": "24/7"
+  }
+},
+{
+  "type": "node",
+  "id": 10700006912,
+  "lat": 45.7591100,
+  "lon": 21.2573380,
+  "tags": {
+    "brand": "Profi",
+    "brand:wikidata": "Q956664",
+    "brand:wikipedia": "en:Profi",
+    "contact:email": "contact@profi.ro",
+    "contact:facebook": "https://www.facebook.com/Profi.ro",
+    "contact:instagram": "https://www.instagram.com/profi.ro",
+    "contact:phone": "+40 751 099 766;+40 751 099 767",
+    "contact:website": "https://www.profi.ro",
+    "contact:youtube": "https://www.youtube.com/user/magazineleprofi",
+    "name": "Profi Go",
+    "opening_hours": "24/7",
+    "operator": "Profi Rom Food",
+    "shop": "convenience"
+  }
+},
+{
+  "type": "node",
+  "id": 11135970144,
+  "lat": 45.7645428,
+  "lon": 21.2604433,
+  "tags": {
+    "addr:city": "Timișoara",
+    "addr:housenumber": "35",
+    "addr:street": "Strada Andrei Șaguna",
+    "brand": "Profi",
+    "brand:wikidata": "Q956664",
+    "name": "Profi Go",
+    "opening_hours": "24/7",
+    "shop": "convenience"
+  }
+},
+{
+  "type": "node",
+  "id": 12823284850,
+  "lat": 45.7588727,
+  "lon": 21.2268498,
+  "tags": {
+    "name": "Kindery",
+    "opening_hours": "24/7",
+    "shop": "convenience"
+  }
+},
+{
+  "type": "node",
+  "id": 13181050724,
+  "lat": 45.7765454,
+  "lon": 21.2425199,
+  "tags": {
+    "addr:city": "Timisoara",
+    "addr:country": "RO",
+    "addr:housenumber": "a64",
+    "addr:postcode": "300246",
+    "addr:street": "Strada Ion Ionescu de la Brad",
+    "contact:phone": "0768 376 786",
+    "name": "Tractari Auto Timisoara Resq",
+    "opening_hours": "24/7",
+    "phone:mobile": "+40 768 376 786",
+    "service:vehicle:towing": "yes",
+    "shop": "car_repair",
+    "website": "https://www.tractariresq.com/"
+  }
+},
+{
+  "type": "node",
+  "id": 13735451920,
+  "lat": 45.7746332,
+  "lon": 21.2013324,
+  "tags": {
+    "name": "BST Storage Containers",
+    "opening_hours": "24/7",
+    "shop": "storage_rental"
+  }
+},
+{
+  "type": "node",
+  "id": 13807919345,
+  "lat": 45.7608893,
+  "lon": 21.2403745,
+  "tags": {
+    "name": "LG Laundry Lounge",
+    "opening_hours": "24/7",
+    "operator": "LG",
+    "payment:cards": "yes",
+    "self_service": "yes",
+    "shop": "laundry"
+  }
+},
+{
+  "type": "node",
+  "id": 14257954002,
+  "lat": 45.7454582,
+  "lon": 21.2368920,
+  "tags": {
+    "addr:housenumber": "6",
+    "addr:street": "Bulevardul Eroilor de la Tisa",
+    "check_date": "2026-10-07",
+    "check_date:opening_hours": "2026-10-07",
+    "level": "0",
+    "name": "Pawn Trendgold SRL",
+    "opening_hours": "24/7",
+    "phone": "+40730942755;+40744543385;+40721902718",
+    "shop": "pawnbroker",
+    "website": "https://trendgold.ro/"
+  }
+},
+{
+  "type": "way",
+  "id": 97812354,
+  "center": {
+    "lat": 45.7745330,
+    "lon": 21.2138371
+  },
+  "nodes": [
+    1132226823,
+    1132226814,
+    1132226820,
+    1132226806,
+    1132226810,
+    1132226816,
+    1132226821,
+    1132226808,
+    1132226812,
+    1132226818,
+    1132226823
+  ],
+  "tags": {
+    "addr:city": "Timișoara",
+    "addr:street": "Calea Torontalului",
+    "amenity": "fuel",
+    "brand": "Petrom",
+    "brand:wikidata": "Q1755034",
+    "brand:wikipedia": "en:Petrom",
+    "building": "yes",
+    "compressed_air": "no",
+    "name": "Petrom",
+    "opening_hours": "24/7",
+    "operator": "Petrom",
+    "phone": "+40 372 056132"
+  }
+},
+{
+  "type": "way",
+  "id": 97821456,
+  "center": {
+    "lat": 45.7680092,
+    "lon": 21.2358998
+  },
+  "nodes": [
+    1132306998,
+    1132306999,
+    1132307002,
+    1132307000,
+    1132306998
+  ],
+  "tags": {
+    "addr:city": "Timișoara",
+    "addr:housenumber": "68",
+    "addr:postcode": "300093",
+    "addr:street": "Strada Divizia 9 Cavalerie",
+    "amenity": "fuel",
+    "brand": "Rompetrol",
+    "brand:wikidata": "Q1788862",
+    "brand:wikipedia": "en:Rompetrol",
+    "building": "yes",
+    "compressed_air": "yes",
+    "contact:email": "infoline@rompetrol.com",
+    "contact:facebook": "https://www.facebook.com/Rompetrol.Romania",
+    "contact:instagram": "https://www.instagram.com/rompetrol",
+    "contact:phone": "+40 371 692 305",
+    "contact:website": "https://www.rompetrol.ro/",
+    "name": "Rompetrol",
+    "opening_hours": "24/7",
+    "operator": "Rompetrol",
+    "tiktok": "https://www.tiktok.com/@rompetrol.romania"
+  }
+},
+{
+  "type": "way",
+  "id": 104357311,
+  "center": {
+    "lat": 45.7422630,
+    "lon": 21.2384487
+  },
+  "nodes": [
+    1203994931,
+    1203994940,
+    1203994929,
+    5443924797,
+    5443924796,
+    1203994920,
+    5443924802,
+    1203994931
+  ],
+  "tags": {
+    "addr:city": "Timișoara",
+    "addr:housenumber": "9",
+    "addr:street": "Strada Arieș",
+    "amenity": "fuel",
+    "brand": "OMV",
+    "brand:wikidata": "Q168238",
+    "brand:wikipedia": "en:OMV",
+    "building": "yes",
+    "compressed_air": "yes",
+    "fuel:diesel": "yes",
+    "fuel:octane_95": "yes",
+    "fuel:octane_98": "yes",
+    "name": "OMV",
+    "opening_hours": "24/7",
+    "payment:cash": "yes",
+    "payment:credit_cards": "yes",
+    "payment:debit_cards": "yes"
+  }
+},
+{
+  "type": "way",
+  "id": 104357475,
+  "center": {
+    "lat": 45.7420985,
+    "lon": 21.2390824
+  },
+  "nodes": [
+    1203996525,
+    1203996524,
+    4947149829,
+    1203996530,
+    1203996527,
+    4554414262,
+    1203996528,
+    1203996529,
+    1203996525
+  ],
+  "tags": {
+    "addr:city": "Timișoara",
+    "addr:housenumber": "10",
+    "addr:postcode": "300579",
+    "addr:postcode:source": "Date de la Poșta Română, publicate sub Licența pentru Guvernare Deschisă v1.0 la http://date.gov.ro/organization/posta-romana",
+    "addr:street": "Strada Arieș",
+    "brand": "Profi",
+    "brand:wikidata": "Q956664",
+    "brand:wikipedia": "en:Profi",
+    "building": "commercial",
+    "building:levels": "1",
+    "contact:email": "contact@profi.ro",
+    "contact:facebook": "https://www.facebook.com/Profi.ro",
+    "contact:instagram": "https://www.instagram.com/profi.ro",
+    "contact:phone": "+40 723 800 377;+40 735 005 202",
+    "contact:website": "https://www.profi.ro/",
+    "contact:youtube": "https://www.youtube.com/user/magazineleprofi",
+    "name": "Profi",
+    "opening_hours": "24/7",
+    "operator": "Profi Rom Food",
+    "shop": "supermarket"
+  }
+},
+{
+  "type": "way",
+  "id": 105319602,
+  "center": {
+    "lat": 45.7316738,
+    "lon": 21.2608247
+  },
+  "nodes": [
+    1213645529,
+    1213645473,
+    1213645526,
+    1213645566,
+    1213645529
+  ],
+  "tags": {
+    "addr:city": "Timișoara",
+    "addr:housenumber": "28",
+    "addr:postcode": "300693",
+    "addr:street": "Calea Buziașului",
+    "brand": "Profi",
+    "brand:wikidata": "Q956664",
+    "brand:wikipedia": "en:Profi",
+    "building": "commercial",
+    "contact:email": "contact@profi.ro",
+    "contact:facebook": "https://www.facebook.com/Profi.ro",
+    "contact:instagram": "https://www.instagram.com/profi.ro",
+    "contact:phone": "+40 728 777 643;+40 737 007 999",
+    "contact:website": "https://www.profi.ro/",
+    "contact:youtube": "https://www.youtube.com/user/magazineleprofi",
+    "name": "Profi",
+    "opening_hours": "24/7",
+    "operator": "PROFI Rom Food",
+    "shop": "supermarket"
+  }
+},
+{
+  "type": "way",
+  "id": 106993715,
+  "center": {
+    "lat": 45.7387205,
+    "lon": 21.2420987
+  },
+  "nodes": [
+    1230228094,
+    1230228091,
+    1230228097,
+    1230228093,
+    1230228087,
+    5443936038,
+    5443936039,
+    1230228095,
+    5443936043,
+    5443936040,
+    1230228094
+  ],
+  "tags": {
+    "addr:city": "Timișoara",
+    "addr:street": "Bulevardul Liviu Rebreanu",
+    "amenity": "fuel",
+    "brand": "MOL",
+    "brand:wikidata": "Q549181",
+    "brand:wikipedia": "en:MOL (company)",
+    "building": "yes",
+    "fuel:diesel": "yes",
+    "fuel:octane_95": "yes",
+    "fuel:octane_98": "yes",
+    "name": "MOL",
+    "opening_hours": "24/7",
+    "payment:cash": "yes",
+    "payment:credit_cards": "yes",
+    "payment:debit_cards": "yes"
+  }
+},
+{
+  "type": "way",
+  "id": 107481441,
+  "center": {
+    "lat": 45.7371165,
+    "lon": 21.2476303
+  },
+  "nodes": [
+    1235206000,
+    1235205978,
+    1235205984,
+    1235205934,
+    1235206000
+  ],
+  "tags": {
+    "addr:city": "Timișoara",
+    "addr:street": "Bulevardul Liviu Rebreanu",
+    "amenity": "fuel",
+    "brand": "Rompetrol",
+    "brand:wikidata": "Q1788862",
+    "brand:wikipedia": "en:Rompetrol",
+    "building": "yes",
+    "contact:email": "infoline@rompetrol.com",
+    "contact:facebook": "https://www.facebook.com/Rompetrol.Romania",
+    "contact:instagram": "https://www.instagram.com/rompetrol",
+    "contact:phone": "+40 372 784 992",
+    "contact:website": "https://www.rompetrol.ro/",
+    "fuel:diesel": "yes",
+    "fuel:octane": "yes",
+    "name": "Rompetrol",
+    "opening_hours": "24/7",
+    "operator": "Rompetrol",
+    "tiktok": "https://www.tiktok.com/@rompetrol.romania"
+  }
+},
+{
+  "type": "way",
+  "id": 107603402,
+  "center": {
+    "lat": 45.7329649,
+    "lon": 21.2099189
+  },
+  "nodes": [
+    1236363789,
+    4223599887,
+    1236363762,
+    1236363767,
+    1236363688,
+    1236363684,
+    1236363727,
+    1236363746,
+    1236363766,
+    1236363786,
+    1236363697,
+    1236363789
+  ],
+  "tags": {
+    "addr:city": "Timișoara",
+    "addr:housename": "Profi",
+    "addr:housenumber": "23",
+    "addr:postcode": "300488",
+    "addr:postcode:source": "Date de la Poșta Română, publicate sub Licența pentru Guvernare Deschisă v1.0 la http://date.gov.ro/organization/posta-romana",
+    "addr:street": "Calea Șagului",
+    "brand": "Profi",
+    "brand:wikidata": "Q956664",
+    "building": "yes",
+    "contact:email": "contact@profi.ro",
+    "contact:facebook": "https://www.facebook.com/Profi.ro",
+    "contact:instagram": "https://www.instagram.com/profi.ro",
+    "contact:phone": "+40 723 800 450;+40 735 005 203",
+    "contact:website": "https://www.profi.ro/",
+    "contact:youtube": "https://www.youtube.com/user/magazineleprofi",
+    "name": "Profi",
+    "opening_hours": "24/7",
+    "operator": "Profi Rom Food",
+    "shop": "supermarket",
+    "source": "local_knowledge",
+    "wheelchair": "limited"
+  }
+},
+{
+  "type": "way",
+  "id": 107710338,
+  "center": {
+    "lat": 45.7523522,
+    "lon": 21.2179323
+  },
+  "nodes": [
+    1237362942,
+    1237362945,
+    1237362943,
+    1237362948,
+    1237362942
+  ],
+  "tags": {
+    "addr:city": "Timișoara",
+    "addr:housenumber": "12A",
+    "addr:postcode": "300004",
+    "addr:postcode:source": "Date de la Poșta Română, publicate sub Licența pentru Guvernare Deschisă v1.0 la http://date.gov.ro/organization/posta-romana",
+    "addr:street": "Bulevardul Republicii",
+    "amenity": "fuel",
+    "brand": "MOL",
+    "brand:wikidata": "Q549181",
+    "building": "retail",
+    "compressed_air": "yes",
+    "name": "MOL",
+    "opening_hours": "24/7",
+    "operator": "MOL Romania"
+  }
+},
+{
+  "type": "way",
+  "id": 110774797,
+  "center": {
+    "lat": 45.7326573,
+    "lon": 21.2107860
+  },
+  "nodes": [
+    1264091369,
+    1264091385,
+    1264091375,
+    1264091384,
+    1264091369
+  ],
+  "tags": {
+    "amenity": "fuel",
+    "brand": "MOL",
+    "brand:wikidata": "Q549181",
+    "building": "retail",
+    "building:levels": "2",
+    "mapillary": "307974997651049",
+    "name": "MOL",
+    "opening_hours": "24/7",
+    "survey:date": "2018-10-08"
+  }
+},
+{
+  "type": "way",
+  "id": 153789154,
+  "center": {
+    "lat": 45.7492872,
+    "lon": 21.2482338
+  },
+  "nodes": [
+    1664285678,
+    1664285711,
+    5443910221,
+    5443910222,
+    1664285695,
+    1664285670,
+    1664285678
+  ],
+  "tags": {
+    "addr:city": "Timișoara",
+    "addr:street": "Bulevardul Eroilor de la Tisa",
+    "amenity": "fuel",
+    "brand": "Rompetrol",
+    "brand:wikidata": "Q1788862",
+    "building": "yes",
+    "compressed_air": "yes",
+    "contact:email": "infoline@rompetrol.com",
+    "contact:facebook": "https://www.facebook.com/Rompetrol.Romania",
+    "contact:instagram": "https://www.instagram.com/rompetrol",
+    "contact:phone": "+40 372 722 939",
+    "contact:website": "https://www.rompetrol.ro/",
+    "fuel:diesel": "yes",
+    "fuel:octane": "yes",
+    "name": "Rompetrol",
+    "opening_hours": "24/7",
+    "operator": "Rompetrol",
+    "payment:cash": "yes",
+    "payment:credit_cards": "yes",
+    "payment:debit_cards": "yes",
+    "tiktok": "https://www.tiktok.com/@rompetrol.romania"
+  }
+},
+{
+  "type": "way",
+  "id": 154485338,
+  "center": {
+    "lat": 45.7495514,
+    "lon": 21.2433657
+  },
+  "nodes": [
+    1670083955,
+    4276609556,
+    1268301829,
+    1268301337,
+    1670083987,
+    4276609559,
+    1670083955
+  ],
+  "tags": {
+    "addr:city": "Timișoara",
+    "addr:housenumber": "1",
+    "addr:street": "Strada Alexandru Vaida Voievod",
+    "brand": "Profi",
+    "brand:wikidata": "Q956664",
+    "building": "yes",
+    "contact:email": "contact@profi.ro",
+    "contact:facebook": "https://www.facebook.com/Profi.ro",
+    "contact:instagram": "https://www.instagram.com/profi.ro",
+    "contact:phone": "+40 720 032 583;+40 720 032 589;+40 799 108 319",
+    "contact:website": "https://www.profi.ro/",
+    "contact:youtube": "https://www.youtube.com/user/magazineleprofi",
+    "name": "Profi Go",
+    "opening_hours": "24/7",
+    "operator": "Profi Rom Food",
+    "shop": "convenience"
+  }
+},
+{
+  "type": "way",
+  "id": 202236909,
+  "center": {
+    "lat": 45.7313024,
+    "lon": 21.2407175
+  },
+  "nodes": [
+    2122158453,
+    2122158447,
+    2122158446,
+    2122158452,
+    2122158453
+  ],
+  "tags": {
+    "amenity": "fuel",
+    "building": "yes",
+    "fuel:diesel": "yes",
+    "fuel:octane_98": "yes",
+    "name": "Produse OMV Petrom",
+    "opening_hours": "24/7"
+  }
+},
+{
+  "type": "way",
+  "id": 203696542,
+  "center": {
+    "lat": 45.7505132,
+    "lon": 21.2099043
+  },
+  "nodes": [
+    2136986341,
+    2136986343,
+    2136986359,
+    2136986358,
+    2136986344,
+    2136986341
+  ],
+  "tags": {
+    "addr:city": "Timișoara",
+    "addr:housenumber": "17",
+    "addr:street": "Bulevardul Republicii",
+    "amenity": "fuel",
+    "brand": "OMV",
+    "brand:wikidata": "Q168238",
+    "brand:wikipedia": "en:OMV",
+    "building": "yes",
+    "name": "OMV",
+    "opening_hours": "24/7",
+    "operator": "OMV",
+    "phone": "+40 372484090"
+  }
+},
+{
+  "type": "way",
+  "id": 239286061,
+  "center": {
+    "lat": 45.7420890,
+    "lon": 21.2174389
+  },
+  "nodes": [
+    2470861222,
+    2470861223,
+    2470861224,
+    2470861225,
+    2470861222
+  ],
+  "tags": {
+    "amenity": "fuel",
+    "building": "yes",
+    "name": "RP Express",
+    "opening_hours": "24/7"
+  }
+},
+{
+  "type": "way",
+  "id": 243832458,
+  "center": {
+    "lat": 45.7579152,
+    "lon": 21.2097809
+  },
+  "nodes": [
+    2511937649,
+    2511937660,
+    2511937689,
+    2511937686,
+    2511937649
+  ],
+  "tags": {
+    "building": "yes",
+    "name": "Rogel & Danii SRL",
+    "opening_hours": "24/7",
+    "shop": "convenience"
+  }
+},
+{
+  "type": "way",
+  "id": 369464115,
+  "center": {
+    "lat": 45.7393040,
+    "lon": 21.2105185
+  },
+  "nodes": [
+    3732551676,
+    3732551677,
+    3732551678,
+    5203257263,
+    5203257258,
+    3732551685,
+    3732551676
+  ],
+  "tags": {
+    "addr:city": "Timișoara",
+    "addr:housenumber": "65",
+    "addr:postcode": "300181",
+    "addr:street": "Bulevardul 16 Decembrie 1989",
+    "amenity": "fuel",
+    "brand": "OMV",
+    "brand:wikidata": "Q168238",
+    "brand:wikipedia": "en:OMV",
+    "building": "yes",
+    "building:levels": "1",
+    "name": "OMV",
+    "opening_hours": "24/7",
+    "operator": "OMV",
+    "phone": "+403 72484098"
+  }
+},
+{
+  "type": "way",
+  "id": 428618283,
+  "center": {
+    "lat": 45.7649705,
+    "lon": 21.2602699
+  },
+  "nodes": [
+    4277034827,
+    4277034828,
+    4277034829,
+    4277034830,
+    4277034827
+  ],
+  "tags": {
+    "addr:city": "Timișoara",
+    "amenity": "fuel",
+    "brand": "OMV",
+    "brand:wikidata": "Q168238",
+    "building": "yes",
+    "name": "OMV",
+    "opening_hours": "24/7",
+    "operator": "OMV"
+  }
+},
+{
+  "type": "way",
+  "id": 751565609,
+  "center": {
+    "lat": 45.7356654,
+    "lon": 21.2382091
+  },
+  "nodes": [
+    7026040189,
+    7026040190,
+    7026040191,
+    7026040192,
+    7026040193,
+    7026040194,
+    7026040195,
+    7026040196,
+    7026040189
+  ],
+  "tags": {
+    "addr:city": "Timișoara",
+    "addr:housenumber": "25",
+    "addr:street": "Calea Martirilor 1989",
+    "building": "yes",
+    "name": "Styx Funerare Martirilor",
+    "opening_hours": "24/7",
+    "outdoor_seating": "yes",
+    "phone": "0762965134",
+    "religion": "christian",
+    "shop": "funeral_directors",
+    "website": "https://styxfunerare.ro/"
+  }
+},
+{
+  "type": "way",
+  "id": 762806254,
+  "center": {
+    "lat": 45.7125017,
+    "lon": 21.1932211
+  },
+  "nodes": [
+    7127910649,
+    8334847325,
+    7127910650,
+    7127910651,
+    7127910652,
+    7127910653,
+    7127910649
+  ],
+  "tags": {
+    "addr:city": "Timișoara",
+    "addr:housenumber": "203",
+    "addr:street": "Calea Șagului",
+    "amenity": "fuel",
+    "brand": "OMV",
+    "brand:wikidata": "Q168238",
+    "brand:wikipedia": "en:OMV",
+    "building": "yes",
+    "name": "OMV",
+    "opening_hours": "24/7",
+    "operator": "OMV",
+    "phone": "+40 372 866225"
+  }
+},
+{
+  "type": "way",
+  "id": 881231457,
+  "center": {
+    "lat": 45.7288149,
+    "lon": 21.1849495
+  },
+  "nodes": [
+    8196054675,
+    8196054676,
+    8196054677,
+    8196054678,
+    8196054675
+  ],
+  "tags": {
+    "brand": "Profi",
+    "brand:wikidata": "Q956664",
+    "brand:wikipedia": "en:Profi",
+    "building": "yes",
+    "contact:email": "contact@profi.ro",
+    "contact:facebook": "https://www.facebook.com/Profi.ro",
+    "contact:instagram": "https://www.instagram.com/profi.ro",
+    "contact:phone": "+40 747 292 518;+40 749 080 064",
+    "contact:website": "https://www.profi.ro",
+    "contact:youtube": "https://www.youtube.com/user/magazineleprofi",
+    "name": "Profi",
+    "opening_hours": "24/7",
+    "operator": "Profi Rom Food",
+    "shop": "supermarket"
+  }
+},
+{
+  "type": "way",
+  "id": 1107718342,
+  "center": {
+    "lat": 45.7699233,
+    "lon": 21.2309297
+  },
+  "nodes": [
+    10135264991,
+    1132305387,
+    1132305389,
+    10135264992,
+    10135264991
+  ],
+  "tags": {
+    "addr:city": "Timișoara",
+    "addr:housenumber": "4",
+    "addr:postcode": "300278",
+    "addr:street": "Calea Sever Bocu",
+    "amenity": "fuel",
+    "brand": "OMV",
+    "brand:wikidata": "Q168238",
+    "brand:wikipedia": "en:OMV",
+    "building": "yes",
+    "compressed_air": "yes",
+    "name": "OMV",
+    "opening_hours": "24/7",
+    "operator": "OMV",
+    "phone": "+403 72484100"
+  }
+},
+{
+  "type": "way",
+  "id": 1267191091,
+  "center": {
+    "lat": 45.7648119,
+    "lon": 21.2068509
+  },
+  "nodes": [
+    11769534695,
+    11769534696,
+    11769534697,
+    11769534698,
+    11769534699,
+    11769534700,
+    11769534701,
+    11769534702,
+    11769534695
+  ],
+  "tags": {
+    "amenity": "fuel",
+    "building": "yes",
+    "compressed_air": "yes",
+    "name": "Baril",
+    "opening_hours": "24/7"
+  }
+},
+{
+  "type": "way",
+  "id": 1306856194,
+  "center": {
+    "lat": 45.7860137,
+    "lon": 21.2175863
+  },
+  "nodes": [
+    12102644556,
+    2122724805,
+    2122724803,
+    2122724801,
+    2122724800,
+    2122724802,
+    2122724804,
+    12102644556
+  ],
+  "tags": {
+    "addr:city": "Timișoara",
+    "addr:street": "Calea Aradului",
+    "amenity": "fuel",
+    "brand": "Petrom",
+    "brand:wikidata": "Q1755034",
+    "building": "yes",
+    "compressed_air": "yes",
+    "name": "Petrom",
+    "opening_hours": "24/7",
+    "operator": "OMV",
+    "phone": "+40 372 448 697"
+  }
+}
+
+  ]
+}
