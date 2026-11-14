@@ -16,7 +16,7 @@ public class UserMapper {
 
         return UserEntity.builder()
                 .name(dto.name())
-                .email(dto.email())
+                .email(dto.email().trim().toLowerCase(java.util.Locale.ROOT))
                 .phoneNumber(dto.phoneNumber())
                 .build();
     }

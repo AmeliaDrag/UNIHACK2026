@@ -151,8 +151,7 @@ public class GlobalExceptionHandler {
         );
     }
 
-    /*
-    //temporary commented
+
 
     // 403 FORBIDDEN
     @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
@@ -165,7 +164,7 @@ public class GlobalExceptionHandler {
                 null
         );
     }
-     */
+
 
     // 404 NOT FOUND - unknown URL
     @ExceptionHandler(NoResourceFoundException.class)
@@ -247,3 +246,4 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(body);
     }
 }
+

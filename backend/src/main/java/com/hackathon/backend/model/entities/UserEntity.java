@@ -5,7 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "app_users")
+@Table(name = "app_users", uniqueConstraints = @UniqueConstraint(
+        name = "uk_user_oauth_identity", columnNames = {"oauth_provider", "oauth_subject"}))
 @Getter
 @Setter
 @AllArgsConstructor
@@ -26,8 +27,10 @@ public class UserEntity {
     private String phoneNumber;
 
     //authentification provider
+    @Column(name = "oauth_provider")
     private String oauthProvider;
 
     //authentification provider's user id
+    @Column(name = "oauth_subject")
     private String oauthSubject;
 }
