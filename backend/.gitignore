@@ -44,3 +44,5 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Local ORS credentials remain private; .env.example contains placeholders only.
