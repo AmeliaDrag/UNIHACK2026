@@ -1,118 +1,139 @@
-# Backend Context — Unihack 2026 Women's Safety Web App
+# UNIHACK 2026 — Stadiul actual al backendului
 
-> Updated from the original `BACKEND_CONTEXT.md` using the implementation summaries and service code shared in chat. **This document is a handoff, not an audit of the current repository.** Codex must inspect actual code before editing; if anything differs, the repository is the source of truth.
+**Data rezumatului:** 14 noiembrie 2026  
+**Scop:** context de continuare pentru un nou chat. Acest fișier descrie stadiul relatat al proiectului, nu reprezintă un audit independent al repository-ului. **Codul real are prioritate** dacă există diferențe între documente.
 
-## 1. Goal and scope
+## 1. Proiectul și responsabilitățile
 
-48-hour hackathon MVP: pedestrian navigation web app showing community risk reports, routes avoiding reported areas where routing API supports it, and SOS alerts to accepted trusted contacts. This repository is **backend only**; frontend is built separately. Prioritize working local demo; avoid needless infrastructure.
+Construim un MVP pentru un hackathon de 48 de ore: aplicație web de siguranță pietonală, în special pentru femei. Utilizatorii pot raporta zone cu potențial risc, pot solicita rute pietonale care încearcă să evite raportările și pot trimite alerte SOS contactelor de încredere.
 
-## 2. Stack / conventions
+Eu lucrez **exclusiv la backend**; colegii dezvoltă frontendul separat. Prioritatea este un demo funcțional, fără overengineering. Frontendul era deja parțial construit și nu a fost proiectat neapărat după contractul backendului.
 
-- Java, Spring Boot, Maven, IntelliJ IDEA; check `pom.xml` for the **actual Spring Boot version** (newer `spring-boot-starter-webmvc` was mentioned).
-- Spring Web MVC, Spring Data JPA / Hibernate, Jakarta Validation, Lombok (`@Getter`, `@Setter`, `@Builder`; no entity `@Data`).
-- H2 in-memory, `jdbc:h2:mem:testdb`; `spring.jpa.hibernate.ddl-auto=update`, `show-sql=true` were reported; PostgreSQL is only a future possibility.
-- Main package: `com.hackathon.backend`; subpackages `config`, `controllers`, `exceptions`, `mappers`, `model.entities`, `model.dtos` (`users`, `reports`, `trustedContacts`, `sosAlerts`), `repositories`, `services`.
-- All REST endpoints implemented so far have prefix **`/api/v1`**. Verify exact annotations in controllers.
-- Entity timestamps use **`LocalDateTime`** by deliberate choice, not `Instant`. Error response timestamps use `OffsetDateTime`.
-- Relationships are `LAZY`; enums stored as strings. DTOs are Java records with `@Builder` and appropriate Jakarta Validation annotations.
-- Spring Security / Auth0 JWT is **the next task**, not confirmed as implemented. Auth0 configuration may already be present in `application.properties`; inspect and preserve correct values. The issuer must be the full HTTPS URL, including trailing `/` (see section 5). Do not assume security classes from previous proposals were created.
+## 2. Stack și convenții
 
-## 3. Implemented components (reported and partly exercised in Postman)
+- Java, Spring Boot, Maven, Spring Web MVC, Spring Data JPA/Hibernate, Jakarta Validation, Lombok.
+- Bază de date **H2 in-memory**: datele aplicației se pierd la repornirea backendului.
+- Spring Security OAuth2 Resource Server + Auth0 JWT.
+- API REST cu prefixul **`/api/v1`**, local de regulă la `http://localhost:8080/api/v1`.
+- Pachet principal: `com.hackathon.backend`; componente în `controllers`, `services`, `repositories`, `mappers`, `model.entities`, `model.dtos`, `config`, `exceptions`.
+- DTO-uri de tip Java `record`; timestampurile rapoartelor și SOS sunt `LocalDateTime` (fără offset în JSON), în timp ce erorile folosesc timestamp cu offset.
+- Pentru versiunea exactă Spring Boot și orice alte detalii: consultați **`pom.xml` și codul actual**, nu presupuneți că vechiul `BACKEND_CONTEXT(4).md` reflectă ultimele implementări.
 
-### Entities and enums
-- `UserEntity` (table `app_users`): id, name, unique email, optional phone number. **Auth0 subject field not yet confirmed; inspect actual entity.**
-- `TrustedContactEntity`: `user`, `contactUser`, `status` default `PENDING`; unique `(user_id, contact_user_id)`; relationship is directional.
-- `ReportEntity`: owner, report type, latitude/longitude, `createdAt`, `expiresAt` set in `@PrePersist` (+24h).
-- `SosAlertEntity`: sender, latitude/longitude, created time, status default `ACTIVE`.
-- Enums: `ReportType` (`LOW_LIGHT`, `SUSPICIOUS_PERSON`, `ISOLATED_AREA`, `DAMAGED_ROAD`, `OTHER`), `TrustedContactStatus` (`PENDING`, `ACCEPTED`), `SosAlertStatus` (`ACTIVE`, `CANCELLED`, `RESOLVED`).
+## 3. Funcționalități backend implementate
 
-### DTOs
-- Users: `UserCreateDTO` (development-only), `UserReadDTO`, `UserUpdateDTO`.
-- Reports: `ReportCreateDTO`, `ReportReadDTO`.
-- Trusted contacts: **`TrustedContactsCreateDTO`** (plural `Contacts` is intentional; accepts `contactEmail`), `TrustedContactReadDTO`.
-- SOS: `SosAlertCreateDTO`, `SosAlertReadDTO`.
-- Check actual record fields rather than inferring them from this document. Previous summary noted `ReportReadDTO.id`, `SosAlertReadDTO.id`, `SosAlertReadDTO.senderName` are used by mappers.
+### Utilizatori
+- Creare manuală utilizator în profilul local `dev` (`POST /users`).
+- Citirea și editarea profilului propriu (`GET /users/me`, `PUT /users/me`).
+- În profilul `auth`, identitatea este extrasă din JWT; creare manuală prin `POST /users` este blocată.
 
-### Mappers
-`UserMapper`, `TrustedContactMapper`, `ReportMapper`, `SosAlertMapper` are Spring `@Component` classes using builders. `UserMapper` normalizes emails via `trim().toLowerCase()`. Time creation belongs to entity `@PrePersist`, not mapper.
+### Raportări de pericole
+- Creare și citire raportări active (`POST /reports`, `GET /reports`).
+- Tipuri: `LOW_LIGHT`, `SUSPICIOUS_PERSON`, `ISOLATED_AREA`, `DAMAGED_ROAD`, `OTHER`.
+- Au coordonate geografice și expiră după **24 h**. Nu există editare/ștergere raport prin API-ul actual.
 
-### Repositories
-`UserRepository`, `TrustedContactRepository`, `ReportRepository`, `SosAlertRepository`; methods described in shared services include:
-- `UserRepository`: `existsByEmailIgnoreCase`, `findByEmailIgnoreCase`.
-- `TrustedContactRepository`: `existsByUserIdAndContactUserId`, `findByUserId`, `findByContactUserId`, inherited `findById`.
-- `ReportRepository`: `findByExpiresAtAfter`, `deleteByExpiresAtBefore` (reported).
-- `SosAlertRepository`: `findBySenderId`, `findReceivedAlerts(currentUserId, SosAlertStatus.ACTIVE)`; query should restrict recipients to contacts with `ACCEPTED` status.
+### Contacte de încredere
+- Invitații prin email, cu status `PENDING` → `ACCEPTED`.
+- Relațiile sunt **direcționale**: dacă A invită B și B acceptă, B primește SOS de la A, nu automat și invers.
+- Doar destinatarul acceptă invitația; oricare dintre părți poate șterge relația.
+- Destinatarul trebuie să aibă deja profil în backend; altfel invitația primește 404.
 
-### Services / actual business rules
-- `UserService`: `create`, `getMe`, `updateMe`. Create checks duplicate email (409). Update rejects blank non-null name (400). User creation is for development, not an anonymous production registration API.
-- `TrustedContactService`: create by contact email (404 if recipient missing, 400 self-add, 409 duplicate); `getSent`, `getReceived`, `accept` (only the invited recipient; PENDING -> ACCEPTED; 403/409 otherwise), `delete` (either party, 403 otherwise).
-- `SosAlertService`: `create`, `getMine`, `getReceived`, `resolve` (only original sender; ACTIVE -> RESOLVED; 403/409 otherwise). SOS is not physically deleted. Validate non-null, finite GPS latitude [-90,90] and longitude [-180,180].
-- `ReportService`: `create`, `getAllActive`; filter `expiresAt > LocalDateTime.now()`; validate finite/in-range GPS coordinates.
-- `CurrentUserService`: currently `@Profile("dev")`, looks up **one fixed email** configured as `app.dev-user-email` in H2; throws 401 if missing. **This is a temporary identity provider and not real login.** The four business services directly inject `CurrentUserService` and call `getCurrentUser()`.
-- All listed business services use `@Transactional` and generally throw `ResponseStatusException` with appropriate HTTP statuses and explicit reason messages. Do not replace these needlessly.
+### SOS
+- Creare alertă cu poziția GPS, citirea alertelor proprii, citirea alertelor primite de la contacte acceptate și rezolvarea de către expeditor.
+- Doar alertele `ACTIVE` ale expeditorilor eligibili apar în lista primită.
+- Nu există endpoint de anulare după trimitere, notificări push, SMS, WebSocket, apel 112 sau garanție de livrare.
+- Frontendul trebuie să facă un **countdown anulabil de 3 secunde înainte de POST** și polling la ~**10 secunde** pentru alertele primite cât aplicația este activă.
 
-### Controllers — implemented endpoints (verify actual mappings)
-- Users: `POST /api/v1/users`, `GET /api/v1/users/me`, `PUT /api/v1/users/me`.
-- Trusted contacts: `POST /api/v1/trusted-contacts`, `GET /api/v1/trusted-contacts/sent`, `GET /api/v1/trusted-contacts/received`, `PATCH /api/v1/trusted-contacts/{id}/accept`, `DELETE /api/v1/trusted-contacts/{id}`.
-- SOS: `POST /api/v1/sos`, `GET /api/v1/sos/mine`, `GET /api/v1/sos/received`, `PATCH /api/v1/sos/{id}/resolve`.
-- Reports: `POST /api/v1/reports`, `GET /api/v1/reports` (active only).
-- No endpoint accepts arbitrary `userId` to impersonate a user; avoid global user list/delete endpoints.
+### Erori
+- Erori JSON standardizate prin `ErrorResponse` (`status`, `error`, `message`, `timestamp`, eventual `validationErrors`), inclusiv pentru 401/403 de securitate.
 
-### Centralized exception handling
-- `exceptions/ErrorResponse`: record built with Lombok `@Builder`; `status`, `error`, `message`, `timestamp` (`OffsetDateTime`), optional `validationErrors` map. `@JsonInclude(NON_NULL)`.
-- `GlobalExceptionHandler` via `@RestControllerAdvice` handles not-found, duplicate, `@Valid`/`MethodArgumentNotValidException`, unreadable JSON, type mismatch, missing parameter, `ConstraintViolationException`, unknown resource, unsupported method/media type, DB integrity violations, unexpected errors, and a **dedicated `ResponseStatusException` handler** to preserve business HTTP status/reason. An `AccessDeniedException` handler was also proposed; verify whether present.
-- Custom `ResourceNotFoundException`, `DuplicateResourceException` may exist but the supplied business services currently use `ResponseStatusException` instead.
-- Security-filter-level 401/403 must be formatted separately with `AuthenticationEntryPoint` / `AccessDeniedHandler`; `@RestControllerAdvice` does not automatically cover them.
+## 4. Auth0 — implementat, dar integrarea reală nu este încă verificată
 
-## 4. Postman test status
+Codex a implementat profilurile de securitate:
 
-The user reports successful tests for:
-- User creation, `GET /users/me`.
-- Valid duplicate email -> **409** `Email already registered`; invalid/missing DTO fields -> **400** with `validationErrors` (these are different cases).
-- Malformed JSON -> **400**, nonexistent URL -> **404**.
-- Create/list active reports; invalid GPS coordinates -> **400**.
-- Trusted contacts: invitation to another existing user, `GET /sent`, duplicate invite -> **409**, invite yourself -> **400**, nonexistent user -> **404**, sender attempting accept -> **403**.
+- **`dev`**: testare locală fără token, cu un singur utilizator fix. Nu permite testarea realistă a fluxurilor cu două identități. **Nu are CORS activat pentru apeluri browser cross-origin**; dacă frontendul rulează pe alt port, pentru acest profil este recomandat un proxy de development (de exemplu Vite, apeluri relative `/api/v1`).
+- **`auth`**: fiecare endpoint de aplicație necesită `Authorization: Bearer <access_token>` valid. Spring verifică semnătura, issuer, audience și expirarea. CORS este restrâns la originile exacte din `FRONTEND_ORIGIN`. Nu activați `dev` într-un deployment public.
 
-**Not yet confirmed tested:** accepting as recipient, deleting contact, SOS end-to-end, multiple authenticated identities, JWT security, GeoJSON or routing.
+**Auth0 configurat în backend:**
+- Domain: `dev-h6e6m3uck5zb26m4.us.auth0.com`
+- Issuer: `https://dev-h6e6m3uck5zb26m4.us.auth0.com/`
+- API audience: `https://unihack-project-api`
+- Semnare API: RS256.
 
-## 5. Next task for Codex: implement Spring Security + Auth0 JWT
+Frontendul trebuie să folosească **Auth0 SPA SDK**, Authorization Code + PKCE, să ceară **access token pentru audience-ul API** și să îl trimită la backend (nu ID token). După autentificare se recomandă `GET /api/v1/users/me` pentru inițializarea profilului. Identitatea backend este legată de `issuer + sub`, nu de un email/userId furnizat de client.
 
-1. **Inspect the real repository first**, especially `pom.xml`, all config and controllers, `UserEntity`, DTOs, mappers, repositories, `CurrentUserService`, `GlobalExceptionHandler` and current Auth0 properties. Use only dependencies appropriate to the actual Boot version.
-2. Set up Spring Security as **OAuth2 Resource Server**, verifying JWT signature, issuer, expiration and expected API audience. Auth0 handles interactive login in frontend (Authorization Code + PKCE). Backend should not implement password login or mint JWTs.
-3. Preserve a **local-only** `dev` configuration for current fixed-user testing, and a secure `auth` configuration (mutually exclusive). **Set the active profile explicitly:** run local development with `dev`, and the authenticated demo with `auth`. Do not silently fall back to `dev`; fail closed if absent or misconfigured. Never deploy an open `dev` security chain. Current `CurrentUserService` is `@Profile("dev")`; refactor to a shared interface/contract with distinct `dev` and `auth` implementations so existing services can keep calling `getCurrentUser()` without business-code changes.
-4. Map a verified JWT identity using issuer + `sub` (or `sub` within the one trusted issuer), **never arbitrary request userId or email alone**. Add a unique Auth0 identity column if needed and preserve entity relationships. **Provisioning decision for this MVP: use an Auth0 Post Login Action, not a userinfo HTTP call.** The Action adds custom claims `https://unihack-project-api/email`, `https://unihack-project-api/name`, and `https://unihack-project-api/email_verified` to the **access token** for this API. Only use claims from a JWT that the resource server has already verified. If required claims are missing/invalid or email is not verified, reject provisioning with a clear 401/403 response and do not create a local user. Normalize email; if a *new* Auth0 `sub` presents an email already stored for another provider identity (or a legacy local record), return **409 Conflict** and **do not auto-link accounts**. Handle races/uniqueness safely, and do not expose sensitive data in errors.
-5. Protect all private endpoints in `auth` mode, including SOS and contacts; disable or restrict `POST /api/v1/users` (development-only manual create) under `auth`. Preserve existing 403 business rules. Restrict CORS to configured frontend origin(s).
-6. Return consistent `ErrorResponse` JSON for filter-level 401 and 403, not only service errors. Avoid leaking stack traces, tokens or coordinates in client errors/logs. Handle Spring Security failures separately from MVC exceptions.
-7. Config: the current Auth0 identifiers may remain in `application.properties` for this hackathon, since **issuer, audience and public SPA client ID are not secrets**. Ensure issuer URI is a **complete HTTPS URL with trailing slash**; for this project the currently provided values are:
-   ```properties
-   spring.security.oauth2.resourceserver.jwt.issuer-uri=https://dev-h6e6m3uck5zb26m4.us.auth0.com/
-   spring.security.oauth2.resourceserver.jwt.audiences=https://unihack-project-api
-   ```
-   Alternatively use `${AUTH0_ISSUER_URI}` and `${AUTH0_AUDIENCE}` environment variables. Treat Auth0 client secrets, management tokens, JWTs and private keys as secrets and never commit or log them. Configure `FRONTEND_ORIGIN` (or equivalent) for restrictive CORS. Resource-server RS256 validation needs no Auth0 client secret. The SPA application for login/Postman PKCE still needs to be configured in Auth0; for Postman allow callback `https://oauth.pstmn.io/v1/callback` in the appropriate Auth0 application, with its own client ID. Document manual Auth0 Dashboard steps, including deploying/attaching the Post Login Action to the Login Flow.
-8. **Keep verification lightweight for the 48h MVP.** At minimum verify: no token -> 401; valid token -> correct current user; two real Auth0 identities -> invited recipient can accept, sender cannot. Extra automated coverage (bad/expired/wrong-audience JWT, provisioning edge cases, 403 response shape) is optional if time allows. Avoid introducing major test infrastructure.
-9. Compile the application, run any existing Maven tests, and report results honestly; do not add a large new test suite. Provide files changed, brief Auth0 Dashboard setup (including SPA application, Action and Postman PKCE callback), manual Postman steps, and outstanding limitations. Do not deploy or change credentials.
+**Post Login Action** din Auth0 adaugă în access token cele trei custom claims necesare pentru primul profil: `https://unihack-project-api/email`, `/name`, `/email_verified` (cu prefixul complet). Pentru un cont nou, emailul trebuie verificat. Claimurile lipsă/invalide pot provoca 401, emailul neverificat 403, iar un email deja asociat unei alte identități 409. Nu se face asociere automată între conturi doar pe baza emailului.
 
-**Important:** Earlier chat contained *suggested* `SecurityConfig`, `DevSecurityConfig` and `AuthCurrentUserService` snippets, but these are **not evidence that any of those files actually exist**. Inspect before creating/replacing.
+**Rămase pentru Auth0:**
+1. De confirmat în Auth0 Dashboard că Post Login Action este deployat și atașat la Login Flow; configurația reală Dashboard nu a fost verificată end-to-end.
+2. De obținut **SPA Client ID public** din aplicația Auth0 de tip Single Page Application și transmis colegilor. Nu se transmite Client Secret.
+3. De stabilit cu echipa URL-ul/originul frontendului, callback URL, logout URL și Allowed Web Origins; de înregistrat valorile în Auth0 și configurat `FRONTEND_ORIGIN` în backend.
+4. Când frontendul este gata: login real cu cel puțin două conturi, token API valid, `/users/me`, invitație acceptată între două persoane și SOS.
 
-## 6. Remaining MVP work (after auth)
+Problema veche de login Google în Postman (autentificare în browser aparent reușită, dar finalizare eșuată în Postman) a rămas nerezolvată; **s-a decis verificarea integrării reale prin frontend**, nu consumarea timpului în Postman.
 
-1. For each active report, calculate an approximately 50 m N/S/E/W diamond; generate valid closed GeoJSON polygons in `[longitude, latitude]` order, not stored in DB.
-2. Integrate OpenRouteService, with routing that attempts to avoid report polygons when `avoid_polygons` is supported by relevant routing profile/API limitations. Never describe a route as guaranteed safe.
-3. Frontend SOS countdown is 3 seconds and cancellable **before** POST. Once sent, accepted contacts see active alerts through authenticated REST polling every 10 seconds, while their app is active. No WebSocket, SMS or 112 call in MVP.
-4. Later only if time allows: scheduled report cleanup, rate limiting/report abuse mitigation, optional PostgreSQL, voice warnings (ElevenLabs), contextual assistant (Gemini), deployment (Vultr).
+## 5. OpenRouteService (ORS) — implementat, fără apel live verificat
 
-## 7. Security/privacy guardrails
+Codex a implementat **`POST /api/v1/routes`**:
 
-- Only accepted contacts may access sender SOS location; always verify permissions server-side.
-- Do not expose phone, email or GPS unnecessarily; avoid sensitive data in logs.
-- Validate coordinates. SOS polling isn't guaranteed delivery; no emergency-service integration.
-- No secrets in git: use environment variables and ignored local files. `.gitignore` will not protect a previously tracked file. Rotate exposed secrets; inspect history if needed.
+1. Frontendul trimite obiecte `origin` și `destination`, fiecare cu `latitude` și `longitude`.
+2. Backendul selectează raportări **active** relevante pentru călătorie (bounding box cu marjă implicită ~500 m).
+3. Generează pentru raportări romburi GeoJSON de aproximativ **50 m** spre N/V/S/E, cu inele închise și coordonate `[longitude, latitude]`.
+4. Reduce raportările foarte apropiate (~25 m), prioritizează zonele apropiate de segmentul A–B, limitează la **100 de poligoane** și le combină într-un `MultiPolygon`.
+5. Cere traseu pietonal de la OpenRouteService prin API-ul server-side, folosind poligoanele drept `avoid_polygons`.
+6. Returnează `geometry` (GeoJSON `LineString`), `distanceMeters`, `durationSeconds`, `avoidanceApplied`, `avoidanceLimited`, `avoidancePolygonCount` și, la nevoie, `warning`.
 
-## 8. Collaboration rules
+**Fallback controlat:** dacă prima cerere a inclus poligoane și ORS întoarce HTTP 400/404 cu codul documentat `2009` (no route), backendul încearcă **o singură dată** fără poligoane. Dacă reușește, răspunde cu `avoidanceApplied=false` și avertisment explicit că ruta nu evită zonele raportate. Nu face fallback pe timeout, 401/403/429/5xx sau erori neconfirmate. O rută nu trebuie prezentată niciodată drept „garantat sigură”. Există limitări pentru deplasări polare/antimeridian și limite de dimensiune ORS.
 
-- Prefer small, practical changes appropriate to a 48h MVP.
-- Inspect actual code; don't guess classes, DTO fields, mappings or Maven versions.
-- Explain paths, modifications, dependencies, and a minimal test for each unit of work.
-- Preserve entity time types, relationships, existing DTO conventions and endpoint behavior.
-- Mark optional improvements explicitly; point out H2/PostgreSQL differences.
-- If implementation and this context conflict, trust current source code and tell the user.
+**Cheia ORS:** utilizatorul a creat o cheie în dashboard și a pus-o local în `backend/.env` ca `ORS_API_KEY=value`. Codex a configurat importul opțional `.env`, `.env.example`, `.gitignore`, URL-ul ORS și timeouturile. Fișierul `.env` este privat: **nu trebuie citit, modificat sau distribuit**. Nici cheia ORS, nici alte secrete nu ajung în frontend.
+
+**Verificarea raportată de Codex:** Maven compile reușit și **18 teste trecute**, inclusiv teste auth/dev și teste ORS simulate (fallback, timeouturi, erori, expirare raportări, configurare). **Nu s-au verificat** apeluri reale ORS, ocolirea efectivă a poligoanelor pe o hartă sau încărcarea fișierului `.env` privat. Utilizatorul a ales să facă verificarea funcțională când frontendul este pregătit, nu acum prin Postman.
+
+**Rămase pentru ORS:** integrarea și verificarea live din frontend: rută A–B fără raportări, apoi raportare pe traseu și verificarea ocolirii reale; afișarea avertismentului și a stării de evitare limitată. De verificat separat că `.env` este ignorat și neurmărit de Git (verificările Git automate ale Codex au eșuat din cauza accesului la directorul părinte).
+
+## 6. Contractul REST actual
+
+**15 endpointuri** sub `/api/v1`:
+
+| Domeniu | Endpointuri |
+|---|---|
+| Users | `POST /users` (doar dev), `GET /users/me`, `PUT /users/me` |
+| Reports | `POST /reports`, `GET /reports` |
+| Trusted contacts | `POST /trusted-contacts`, `GET /trusted-contacts/sent`, `GET /trusted-contacts/received`, `PATCH /trusted-contacts/{id}/accept`, `DELETE /trusted-contacts/{id}` |
+| SOS | `POST /sos`, `GET /sos/mine`, `GET /sos/received`, `PATCH /sos/{id}/resolve` |
+| Routing | `POST /routes` |
+
+**Sursa detaliată și actualizată pentru frontend este `FRONTEND_API(1).md` / `FRONTEND_API.md`**: DTO-uri și validări, exemple JSON, statusuri, permisiuni, convenții geografice, erori, comportament SOS și ORS. Acest rezumat nu înlocuiește documentul respectiv.
+
+## 7. Predarea către echipa de frontend — realizată
+
+Codex a inspectat codul real și a generat **`FRONTEND_API.md`** în directorul backendului. Conform raportului, include toate cele 15 endpointuri, exemple JSON valide, Auth0, erori, rutare și fluxuri complete. A fost transmis colegilor **designul/contractul API actual** pentru integrarea cu frontendul deja parțial construit.
+
+Echipa de frontend a primit instrucțiuni să:
+- compare frontendul existent cu documentația și să păstreze componentele deja corecte;
+- propună un plan de adaptare **înainte de a modifica codul**;
+- nu modifice backendul sau să inventeze endpointuri;
+- păstreze URL-ul API și setările Auth0 în variabile de configurare frontend;
+- poată dezvolta temporar împotriva backendului `dev`, fără Auth0, folosind proxy-ul serverului frontend (de exemplu Vite) pentru a evita CORS;
+- treacă ulterior la profilul backend `auth` pentru verificarea loginului și a fluxurilor cu utilizatori diferiți;
+- respecte GeoJSON `[longitude,latitude]`, warnings de rutare și fluxul SOS (countdown + polling).
+
+**Important:** transmiterea documentației nu înseamnă că adaptarea frontendului este deja finalizată. Stadiul efectiv al implementării la colegi nu a fost confirmat în acest chat.
+
+## 8. Ce urmează — priorități practice
+
+1. **Coordonare cu frontendul:** obțineți adresa exactă a frontendului, portul și callback/logout path-urile; transmiteți publicul **Auth0 SPA Client ID** și configurați Dashboard + `FRONTEND_ORIGIN`.
+2. **Integrare Auth0 prin UI:** profil backend `auth`, login PKCE real, `/users/me`, două conturi și permisiuni trusted contacts/SOS.
+3. **Integrare hartă/rute:** frontendul afișează raportările, trimite A/B la `POST /routes`, desenează geometria, afișează `warning`/`avoidanceLimited`; validați primul apel live ORS și comportamentul real de evitare.
+4. **Integrare SOS:** countdown anulabil înainte de POST, polling în aplicație activă, acceptare invitații și rezolvare alerte.
+5. **Config/securitate:** confirmați că `.env` nu este urmărit de Git; nu puneți secrete în repository/frontend; testați CORS potrivit originului frontend. H2 pierde date la restart — acceptat pentru demo, cu această limitare cunoscută.
+
+Nu prioritizați acum refactorizări mari, teste suplimentare ample, infrastructură nouă sau reluarea problemei Postman, decât dacă integrarea frontend descoperă un blocaj real.
+
+## 9. Fișiere care vor fi furnizate în următoarea conversație
+
+1. **`AUTH_SETUP.md`** — detaliile implementării Auth0 și pașii Dashboard/manuali; unele formulări mai vechi despre când se inițializează profilul sunt clarificate de contractul frontend.
+2. **`BACKEND_CONTEXT(4).md`** — context mai vechi despre arhitectură și reguli de business; secțiunea care descrie Auth0 ca „viitor” este **depășită**, la fel și lista de sarcini care încă tratează rutarea drept neimplementată.
+3. **`FRONTEND_API(1).md`** — contractul REST bazat pe codul real la momentul generării, cel mai util pentru integrarea frontend.
+4. **Acest fișier** — rezumatul stadiului actual și al deciziilor luate în conversația recentă.
+
+**Regulă de lucru în viitor:** verifică repository-ul real când o decizie depinde de cod. Nu interpreta rezumatele drept garanție că integrarea live este verificată. Răspunde în română, practic și concis, cu prioritate pe MVP.
