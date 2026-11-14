@@ -25,6 +25,11 @@ public class UserEntity {
     private String email;
 
     private String phoneNumber;
+    // ladybug avatar colors as #rrggbb (optional)
+    @Column(length = 7)
+    private String wingColor;
+    @Column(length = 7)
+    private String dotColor;
 
     //authentification provider
     @Column(name = "oauth_provider")

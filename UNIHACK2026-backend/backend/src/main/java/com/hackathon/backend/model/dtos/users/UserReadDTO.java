@@ -6,5 +6,7 @@ import lombok.Builder;
 public record UserReadDTO(
         String name,
         String email,
-        String phoneNumber
+        String phoneNumber,
+        String wingColor,
+        String dotColor
 ) {}

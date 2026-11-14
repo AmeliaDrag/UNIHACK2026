@@ -31,6 +31,10 @@ public class TrustedContactMapper {
                 .contactUserName(contact.getContactUser().getName())
                 .contactUserEmail(contact.getContactUser().getEmail())
                 .status(contact.getStatus())
+                .userWingColor(contact.getUser().getWingColor())
+                .userDotColor(contact.getUser().getDotColor())
+                .contactUserWingColor(contact.getContactUser().getWingColor())
+                .contactUserDotColor(contact.getContactUser().getDotColor())
                 .build();
     }
 }

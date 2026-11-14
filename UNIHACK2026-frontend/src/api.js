@@ -1,183 +1,87 @@
 /**
- * api.js — data access layer backed by the Spring Boot backend.
+ * api.js — two data-access layers:
  *
- * All calls go to /api/v1/... (proxied to http://localhost:8080 in dev).
+ *  1. `api`        — json-server mock (port 3001 via /api proxy). Used by
+ *                    guest mode and dev features (friends, shares, chat).
  *
- * In dev mode (VITE_AUTH_MODE=dev) no token is sent.
- * In auth mode a Bearer token is injected via api.init(getTokenFn).
+ *  2. `backendApi` — Spring Boot REST (port 8081 via /api/v1 proxy).
+ *                    Requires a Bearer access token supplied by setTokenProvider().
  *
- * Usage:
- *   import { api } from './api';
- *   api.init(getAccessToken);   // call once after auth is set up
+ * Call setTokenProvider(fn) once after Auth0 login.
+ * fn must be an async function that resolves to a valid access-token string.
  */
 
-import { config } from './config';
+// ── Token provider ────────────────────────────────────────────────────────────
+let _tokenProvider = null;
 
-const BASE = '/api/v1';
-
-let _getToken = null;
-
-/**
- * Set the token getter function for auth mode.
- * @param {(() => Promise<string|null>)|null} getTokenFn
- */
-function init(getTokenFn) {
-  _getToken = getTokenFn;
+export function setTokenProvider(fn) {
+  _tokenProvider = fn;
 }
 
+export function clearTokenProvider() {
+  _tokenProvider = null;
+}
+
+async function getBearerToken() {
+  if (!_tokenProvider) throw new Error('No token provider set. Call setTokenProvider() after login.');
+  return _tokenProvider();
+}
+
+// ── json-server mock API (/api proxy → port 3001) ────────────────────────────
+const BASE = '/api';
+
 async function req(method, path, body) {
-  const headers = {};
-
-  if (body !== undefined) {
-    headers['Content-Type'] = 'application/json';
-  }
-
-  // Inject Bearer token when in auth mode and a getter is set
-  if (config.authMode === 'auth' && _getToken) {
-    try {
-      const token = await _getToken();
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-    } catch {
-      // If token fetch fails, proceed without token (let server reject if needed)
-    }
-  }
-
   const res = await fetch(`${BASE}${path}`, {
     method,
-    headers,
+    headers: body !== undefined ? { 'Content-Type': 'application/json' } : {},
     ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
   });
-
-  if (res.status === 204) return null;
-
   if (!res.ok) {
-    // Try to parse structured error body {status, error, message}
-    const contentType = res.headers.get('content-type') || '';
-    if (contentType.includes('application/json')) {
-      try {
-        const errBody = await res.json();
-        throw new Error(errBody.message || errBody.error || `HTTP ${res.status}`);
-      } catch (e) {
-        if (e instanceof SyntaxError) throw new Error(`HTTP ${res.status}`);
-        throw e;
-      }
-    } else {
-      const text = await res.text().catch(() => res.statusText);
-      throw new Error(text || `HTTP ${res.status}`);
-    }
+    const text = await res.text().catch(() => res.statusText);
+    console.error(`[mock-api] ${method} ${BASE}${path} -> ${res.status}`, { requestBody: body, response: text });
+    const err = new Error(text || `HTTP ${res.status}`);
+    err.status = res.status;
+    throw err;
   }
-
-  // Some 2xx responses may have no body
-  const ct = res.headers.get('content-type') || '';
-  if (!ct.includes('application/json')) return null;
-
+  if (res.status === 204) return null;
   return res.json();
 }
 
-const get    = (path)        => req('GET',    path);
-const post   = (path, body)  => req('POST',   path, body);
-const put    = (path, body)  => req('PUT',    path, body);
-const patch  = (path, body)  => req('PATCH',  path, body);
-const del    = (path)        => req('DELETE', path);
+const get  = (path)       => req('GET',    path);
+const post = (path, body) => req('POST',   path, body);
+const put  = (path, body) => req('PUT',    path, body);
+const del  = (path)       => req('DELETE', path);
 
 export const api = {
-  init,
-
-  // ── User ─────────────────────────────────────────────────────────────────
-  /** GET /api/v1/users/me */
-  getMe: () =>
-    get('/users/me'),
-
-  /** PUT /api/v1/users/me */
-  updateMe: ({ name, phoneNumber }) =>
-    put('/users/me', { name, phoneNumber }),
-
-  // ── Reports ──────────────────────────────────────────────────────────────
-  /** GET /api/v1/reports */
+  // ── Reports (mock) ──────────────────────────────────────────────────────────
   listReports: () =>
-    get('/reports'),
+    get('/reports?_sort=createdAt&_order=desc&_limit=100'),
 
-  /**
-   * POST /api/v1/reports
-   * @param {{ type: string, latitude: number, longitude: number }} report
-   */
-  addReport: ({ type, latitude, longitude }) =>
-    post('/reports', { type, latitude, longitude }),
+  addReport: (r) =>
+    post('/reports', { ...r, confirmations: [], status: 'open', createdAt: Date.now() }),
 
-  // ── Trusted contacts ─────────────────────────────────────────────────────
-  /** GET /api/v1/trusted-contacts/sent */
-  getSentContacts: () =>
-    get('/trusted-contacts/sent'),
-
-  /** GET /api/v1/trusted-contacts/received */
-  getReceivedContacts: () =>
-    get('/trusted-contacts/received'),
-
-  /**
-   * POST /api/v1/trusted-contacts
-   * @param {{ contactEmail: string }} contact
-   */
-  addContact: ({ contactEmail }) =>
-    post('/trusted-contacts', { contactEmail }),
-
-  /** PATCH /api/v1/trusted-contacts/:id/accept */
-  acceptContact: (id) =>
-    patch(`/trusted-contacts/${id}/accept`),
-
-  /** DELETE /api/v1/trusted-contacts/:id  (204, no body) */
-  deleteContact: (id) =>
-    del(`/trusted-contacts/${id}`),
-
-  // ── SOS alerts ───────────────────────────────────────────────────────────
-  /** POST /api/v1/sos */
-  sendSos: ({ latitude, longitude }) =>
-    post('/sos', { latitude, longitude }),
-
-  /** GET /api/v1/sos/mine */
-  getMySos: () =>
-    get('/sos/mine'),
-
-  /** GET /api/v1/sos/received */
-  getReceivedSos: () =>
-    get('/sos/received'),
-
-  /** PATCH /api/v1/sos/:id/resolve */
-  resolveSos: (id) =>
-    patch(`/sos/${id}/resolve`),
-
-  // ── Routes ───────────────────────────────────────────────────────────────
-  /**
-   * POST /api/v1/routes
-   * @param {{ origin: {latitude, longitude}, destination: {latitude, longitude} }} params
-   * @returns {{ geometry, distanceMeters, durationSeconds, avoidanceApplied, avoidanceLimited, warning }}
-   */
-  getRoute: ({ origin, destination }) =>
-    post('/routes', { origin, destination }),
-
-  // ── Chat (json-server / Firebase — kept for ChatPage compatibility) ──────
-  listMessages: (room, after) => {
-    // ChatPage uses this; it talks to Firebase directly via firebase.js,
-    // but ChatPage calls api.listMessages. Keep a stub that delegates through
-    // the same /api path so ChatPage continues to work if the server has it,
-    // or fails gracefully otherwise.
-    let url = `/messages?room=${encodeURIComponent(room)}&_sort=createdAt&_order=asc`;
-    if (after) url += `&createdAt_gte=${encodeURIComponent(after)}`;
-    return get(url);
+  confirmReport: async (id, uid) => {
+    const report = await get(`/reports/${id}`);
+    const confirmations = [...new Set([...(report.confirmations ?? []), uid])];
+    return put(`/reports/${id}`, { ...report, confirmations });
   },
 
-  sendMessage: (msg) =>
-    post('/messages', { ...msg, createdAt: Date.now() }),
+  resolveReport: async (id) => {
+    const report = await get(`/reports/${id}`);
+    return put(`/reports/${id}`, { ...report, status: 'resolved' });
+  },
 
-  // ── Location sharing (kept for SharePage / TrackPage compatibility) ──────
+  // ── Trusted contacts (mock) ─────────────────────────────────────────────────
   listContacts: (uid) =>
     get(`/contacts?uid=${encodeURIComponent(uid)}`),
 
-  addContact_legacy: (c) =>
+  addContact: (c) =>
     post('/contacts', c),
 
   removeContact: (id) =>
     del(`/contacts/${id}`),
 
+  // ── Location sharing (mock) ─────────────────────────────────────────────────
   startShare: async (s) => {
     const rec = await post('/shares', { ...s, active: true, createdAt: Date.now() });
     return rec.id;
@@ -207,4 +111,139 @@ export const api = {
     const timer = setInterval(poll, 5000);
     return () => { cancelled = true; clearInterval(timer); };
   },
+
+  // ── SOS alerts (mock) ───────────────────────────────────────────────────────
+  sendAlert: (a) =>
+    post('/alerts', { ...a, createdAt: Date.now() }),
+
+  // ── Chat (mock) ─────────────────────────────────────────────────────────────
+  listMessages: (room, after) => {
+    let url = `/messages?room=${encodeURIComponent(room)}&_sort=createdAt&_order=asc`;
+    if (after) url += `&createdAt_gte=${encodeURIComponent(after)}`;
+    return get(url);
+  },
+
+  sendMessage: (msg) =>
+    post('/messages', { ...msg, createdAt: Date.now() }),
+
+  // ── Friends (mock) ──────────────────────────────────────────────────────────
+  listFriends: (uid) =>
+    get(`/friends?uid=${encodeURIComponent(uid)}`),
+
+  addFriend: (f) =>
+    post('/friends', { ...f, createdAt: Date.now() }),
+
+  removeFriend: (id) =>
+    del(`/friends/${id}`),
+};
+
+// ── Readable error text for the UI. lang: 'en' | 'ro' ─────────────────────────
+const ERR_TEXT = {
+  en: {
+    net: 'Cannot reach the server (network or CORS problem).',
+    401: 'Your session is not valid. Sign out and sign in again.',
+    400: 'Invalid request', 403: 'Not allowed', 404: 'Not found',
+    409: 'Conflict', 500: 'Server error', other: 'Something went wrong',
+  },
+  ro: {
+    net: 'Conexiunea la server a eșuat (rețea sau CORS).',
+    401: 'Sesiune invalidă. Deconectează-te și autentifică-te din nou.',
+    400: 'Cerere invalidă', 403: 'Acces interzis', 404: 'Negăsit',
+    409: 'Conflict', 500: 'Eroare de server', other: 'A apărut o eroare',
+  },
+};
+
+/** status 0 = real network failure; otherwise the HTTP status + the server's "message". */
+export function describeApiError(err, lang = 'en') {
+  const t = ERR_TEXT[lang] || ERR_TEXT.en;
+  const status = err?.status;
+  const server = err?.message;
+  if (status === 0) return t.net;
+  if (status === 401) return t[401];
+  if (status && t[status]) return server ? `${t[status]}: ${server}` : t[status];
+  return server || t.other;
+}
+// ── Spring Boot authenticated API (/api/v1 proxy → port 8081) ─────────────────
+
+// VITE_API_BASE_URL is the backend origin only (no trailing slash, no /api/v1),
+// e.g. http://localhost:8081. A trailing "/" or "/api/v1" is tolerated.
+// If it is empty, requests stay relative and go through the Vite /api/v1 proxy.
+const API_ORIGIN = (import.meta.env.VITE_API_BASE_URL || '')
+  .trim()
+  .replace(/\/+$/, '')
+  .replace(/\/api\/v1$/, '');
+const API_BASE = `${API_ORIGIN}/api/v1`;
+
+async function authReq(method, path, body) {
+  const token = await getBearerToken();
+  const headers = { Authorization: `Bearer ${token}` };
+  if (body !== undefined) headers['Content-Type'] = 'application/json';
+  const url = `${API_BASE}${path}`;
+
+  let res;
+  try {
+    res = await fetch(url, {
+      method,
+      headers,
+      ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+    });
+  } catch (netErr) {
+    console.error(`[api] ${method} ${url} -> network error`, { requestBody: body }, netErr);
+    const err = new Error(`Cannot reach the backend at ${url}`);
+    err.status = 0; err.url = url;
+    throw err;
+  }
+
+  if (!res.ok) {
+    // Read the body once as text, then try JSON.
+    const raw = await res.text().catch(() => '');
+    let parsed = null;
+    try { parsed = JSON.parse(raw); } catch { /* not JSON */ }
+    console.error(`[api] ${method} ${url} -> ${res.status}`, { requestBody: body, response: parsed ?? raw });
+    const err = new Error((parsed && parsed.message) || raw.trim().slice(0, 200) || `HTTP ${res.status}`);
+    err.status = res.status; err.url = url; err.body = parsed ?? raw;
+    throw err;
+  }
+
+  if (res.status === 204) return null;
+  return res.json();
+}
+const bGet    = (path)        => authReq('GET',   path);
+const bPost   = (path, body)  => authReq('POST',  path, body);
+const bPut    = (path, body)  => authReq('PUT',   path, body);
+const bPatch  = (path)        => authReq('PATCH', path);
+const bDelete = (path)        => authReq('DELETE', path);
+
+export const backendApi = {
+  // ── User profile ────────────────────────────────────────────────────────────
+  getMe: ()       => bGet('/users/me'),
+  updateMe: (dto) => bPut('/users/me', dto),
+
+  // ── Reports ─────────────────────────────────────────────────────────────────
+  listReports: ()    => bGet('/reports'),
+  addReport:   (dto) => bPost('/reports', dto),
+
+  // ── Trusted contacts ────────────────────────────────────────────────────────
+  sentContacts:     ()   => bGet('/trusted-contacts/sent'),
+  receivedContacts: ()   => bGet('/trusted-contacts/received'),
+  addContact:       (dto) => bPost('/trusted-contacts', dto),
+  acceptContact:    (id)  => bPatch(`/trusted-contacts/${id}/accept`),
+  deleteContact:    (id)  => bDelete(`/trusted-contacts/${id}`),
+
+  // -- Friends + in-app chat (accepted friends only) --
+  listFriends:  ()                   => bGet('/friends'),
+  sendMessage:  (dto)                => bPost('/messages', dto),
+  receivedMessages: (afterId)        =>
+    bGet('/messages/received' + (afterId != null ? `?afterId=${encodeURIComponent(afterId)}` : '')),
+  messagesWith: (friendId, afterId)  =>
+    bGet(`/messages/with/${encodeURIComponent(friendId)}` +
+         (afterId != null ? `?afterId=${encodeURIComponent(afterId)}` : '')),
+  // ── SOS ─────────────────────────────────────────────────────────────────────
+  sendSos:    (dto) => bPost('/sos', dto),
+  mySos:      ()    => bGet('/sos/mine'),
+  receivedSos:()    => bGet('/sos/received'),
+  resolveSos: (id)  => bPatch(`/sos/${id}/resolve`),
+
+  // ── Routes ──────────────────────────────────────────────────────────────────
+  getRoute: (dto) => bPost('/routes', dto),
 };

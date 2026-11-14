@@ -14,5 +14,9 @@ public record TrustedContactReadDTO (
         Long contactUserId,
         String contactUserName,
         String contactUserEmail,
-        TrustedContactStatus status
+        TrustedContactStatus status,
+        String userWingColor,
+        String userDotColor,
+        String contactUserWingColor,
+        String contactUserDotColor
 ) {}

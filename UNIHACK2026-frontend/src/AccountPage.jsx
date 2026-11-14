@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { api } from './api';
-import { useSession } from './auth';
+import { useEffect, useRef, useState } from 'react';
+import { backendApi, describeApiError } from './api';
+import FriendsSection from './FriendsSection';
 import './AccountPage.css';
 
 const COUNTRY_CODES = [
@@ -14,16 +14,54 @@ const COUNTRY_CODES = [
   { flag: '🇺🇸', code: '+1',   label: '🇺🇸 +1'   },
 ];
 
-function Ladybug() {
+// ── Ladybug colors: saved on this device, per user ──────────────────────────
+const DEFAULT_COLORS = { wings: '#c62828', dots: '#111111' };
+const WING_PRESETS = ['#c62828', '#e91e8c', '#ff9800', '#fdd835', '#43a047', '#1e88e5', '#8e24aa', '#f5f5f5'];
+const DOT_PRESETS  = ['#111111', '#ffffff', '#c62828', '#fdd835', '#1e88e5', '#43a047', '#8e24aa', '#ff9800'];
+const HEX = /^#[0-9a-f]{6}$/i;
+const colorKey = (uid) => `ladybugColors:${uid || 'anon'}`;
+
+function loadColors(uid) {
+  try {
+    const c = JSON.parse(localStorage.getItem(colorKey(uid)) || 'null');
+    return {
+      wings: HEX.test(c?.wings) ? c.wings : DEFAULT_COLORS.wings,
+      dots:  HEX.test(c?.dots)  ? c.dots  : DEFAULT_COLORS.dots,
+    };
+  } catch { return { ...DEFAULT_COLORS }; }
+}
+function saveColors(uid, colors) {
+  try { localStorage.setItem(colorKey(uid), JSON.stringify(colors)); } catch { /* storage blocked */ }
+}
+
+function ColorRow({ label, value, presets, onChange }) {
+  return (
+    <div className="lb-color-row">
+      <span className="lb-color-label">{label}</span>
+      <div className="lb-swatches">
+        {presets.map((c) => (
+          <button
+            key={c} type="button" aria-label={`${label} ${c}`}
+            className={`lb-swatch${value.toLowerCase() === c ? ' on' : ''}`}
+            style={{ background: c }} onClick={() => onChange(c)}
+          />
+        ))}
+        <input type="color" className="lb-color-input" value={value}
+          aria-label={`${label} personalizat`} onChange={(e) => onChange(e.target.value)} />
+      </div>
+    </div>
+  );
+}
+function Ladybug({ wings = DEFAULT_COLORS.wings, dots = DEFAULT_COLORS.dots }) {
   return (
     <svg viewBox="0 0 120 120" className="lb-avatar" aria-hidden="true">
-      <ellipse cx="60" cy="68" rx="38" ry="34" fill="#c62828" />
+      <ellipse cx="60" cy="68" rx="38" ry="34" fill={wings} />
       <line x1="60" y1="34" x2="60" y2="102" stroke="#111" strokeWidth="3.5" />
-      <circle cx="42" cy="58" r="8"  fill="#111" />
-      <circle cx="78" cy="58" r="8"  fill="#111" />
-      <circle cx="40" cy="80" r="7"  fill="#111" />
-      <circle cx="80" cy="80" r="7"  fill="#111" />
-      <circle cx="60" cy="90" r="6"  fill="#111" />
+      <circle cx="42" cy="58" r="8"  fill={dots} />
+      <circle cx="78" cy="58" r="8"  fill={dots} />
+      <circle cx="40" cy="80" r="7"  fill={dots} />
+      <circle cx="80" cy="80" r="7"  fill={dots} />
+      <circle cx="60" cy="90" r="6"  fill={dots} />
       <circle cx="60" cy="34" r="18" fill="#111" />
       <circle cx="52" cy="29" r="4" fill="#fff" />
       <circle cx="68" cy="29" r="4" fill="#fff" />
@@ -51,89 +89,92 @@ function MiniBug({ size = 22 }) {
   );
 }
 
-// Split a full phone number like "+40712345678" into code + local
-function splitPhone(full) {
-  if (!full) return { code: '+40', local: '' };
-  for (const c of COUNTRY_CODES.sort((a, b) => b.code.length - a.code.length)) {
-    if (full.startsWith(c.code)) {
-      return { code: c.code, local: full.slice(c.code.length) };
-    }
-  }
-  return { code: '+40', local: full };
-}
-
-export default function AccountPage({ name, uid, isAuthenticated, onLogin, onLogout, onGoShare, onGoChat }) {
-  const { backendProfile } = useSession();
-
-  // Profile fields — seed from backendProfile when it loads
+export default function AccountPage({ name, email, phoneNumber, wingColor, dotColor, uid, isAuthenticated, isGuest, onLogin, onLogout, onGoShare, onGoChat, onProfileUpdated }) {
   const [editName,    setEditName]    = useState(name || '');
   const [countryCode, setCountryCode] = useState('+40');
   const [phoneLocal,  setPhoneLocal]  = useState('');
-  const [saveState,   setSaveState]   = useState('idle'); // idle | saving | ok | error
+  const [saved,       setSaved]       = useState(false);
   const [saveError,   setSaveError]   = useState(null);
+  const [saving,      setSaving]      = useState(false);
+  const [colors,      setColors]      = useState(() => loadColors(uid));
+  const [editingLook, setEditingLook]  = useState(false);
+  const [colorError, setColorError] = useState(null);
+  const pushTimer = useRef(null);
+  const appliedRemote = useRef(false);
 
+  // Save the colors on the server (debounced) so friends see them too.
+  const pushColors = (c) => {
+    if (isGuest) return;
+    clearTimeout(pushTimer.current);
+    pushTimer.current = setTimeout(async () => {
+      try {
+        const updated = await backendApi.updateMe({ wingColor: c.wings, dotColor: c.dots });
+        setColorError(null);
+        if (onProfileUpdated) onProfileUpdated(updated);
+      } catch (e) {
+        console.error('[account] saving ladybug colors failed:', e);
+        setColorError(describeApiError(e, 'ro'));
+      }
+    }, 600);
+  };
+
+  // First load: the server's colors win; colors only stored on this device are uploaded once.
   useEffect(() => {
-    if (!backendProfile) return;
-    if (backendProfile.name)        setEditName(backendProfile.name);
-    if (backendProfile.phoneNumber) {
-      const { code, local } = splitPhone(backendProfile.phoneNumber);
-      setCountryCode(code);
-      setPhoneLocal(local);
+    const local = loadColors(uid);
+    if (isGuest) { setColors(local); return; }
+    if (appliedRemote.current) return;
+    appliedRemote.current = true;
+    const hasW = HEX.test(wingColor);
+    const hasD = HEX.test(dotColor);
+    const merged = { wings: hasW ? wingColor : local.wings, dots: hasD ? dotColor : local.dots };
+    setColors(merged);
+    saveColors(uid, merged);
+    const isDefault = merged.wings === DEFAULT_COLORS.wings && merged.dots === DEFAULT_COLORS.dots;
+    if ((!hasW || !hasD) && !isDefault) pushColors(merged);
+  }, [uid]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const applyColors = (next) => { setColors(next); saveColors(uid, next); pushColors(next); };
+  const setColor = (part, value) => applyColors({ ...colors, [part]: value });
+  const resetColors = () => applyColors({ ...DEFAULT_COLORS });
+  // Pre-fill phone if we have one
+  useEffect(() => {
+    if (phoneNumber) {
+      // Try to split country code
+      const match = COUNTRY_CODES.find((c) => phoneNumber.startsWith(c.code));
+      if (match) {
+        setCountryCode(match.code);
+        setPhoneLocal(phoneNumber.slice(match.code.length));
+      } else {
+        setPhoneLocal(phoneNumber);
+      }
     }
-  }, [backendProfile]);
+  }, [phoneNumber]);
 
-  // ── Trusted contacts ──
-  const [sent,     setSent]     = useState([]);
-  const [received, setReceived] = useState([]);
-  const [cEmail,   setCEmail]   = useState('');
-  const [cBusy,    setCBusy]    = useState(false);
-  const [cError,   setCError]   = useState(null);
+  // Keep editName in sync when backendProfile prop changes
+  useEffect(() => { if (name) setEditName(name); }, [name]);
 
-  const loadContacts = () => {
-    if (!uid) return;
-    api.getSentContacts().then(setSent).catch(() => {});
-    api.getReceivedContacts().then(setReceived).catch(() => {});
-  };
-  useEffect(() => { loadContacts(); }, [uid]);
-
-  const addContact = async () => {
-    if (!cEmail.trim()) return setCError('Enter an email address.');
-    setCBusy(true); setCError(null);
-    try {
-      await api.addContact({ contactEmail: cEmail.trim() });
-      setCEmail('');
-      loadContacts();
-    } catch (e) {
-      setCError(e.message);
-    } finally {
-      setCBusy(false);
-    }
-  };
-
-  const deleteContact = async (id) => {
-    try { await api.deleteContact(id); loadContacts(); }
-    catch (e) { alert(e.message); }
-  };
-
-  const acceptContact = async (id) => {
-    try { await api.acceptContact(id); loadContacts(); }
-    catch (e) { alert(e.message); }
-  };
-
-  // ── Save profile ──
   const save = async () => {
-    setSaveState('saving'); setSaveError(null);
+    setSaveError(null);
+    setSaving(true);
     try {
-      await api.updateMe({
-        name: editName.trim() || undefined,
-        phoneNumber: phoneLocal.trim() ? countryCode + phoneLocal.trim() : undefined,
-      });
-      setSaveState('ok');
-      setTimeout(() => setSaveState('idle'), 1800);
+      if (isGuest) {
+        // Guest: local save only
+        setSaved(true);
+        setTimeout(() => setSaved(false), 1800);
+        return;
+      }
+      const dto = { name: editName.trim() };
+      const fullPhone = (countryCode + phoneLocal.trim()).replace(/\s/g, '');
+      if (phoneLocal.trim()) dto.phoneNumber = fullPhone;
+
+      const updated = await backendApi.updateMe(dto);
+      if (onProfileUpdated) onProfileUpdated(updated);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 1800);
     } catch (e) {
-      setSaveError(e.message);
-      setSaveState('error');
-      setTimeout(() => setSaveState('idle'), 3000);
+      setSaveError(e.message || 'Save failed.');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -148,13 +189,33 @@ export default function AccountPage({ name, uid, isAuthenticated, onLogin, onLog
 
   return (
     <div className="lb-page" style={{ alignItems: 'stretch', padding: '16px 16px 24px', gap: '12px', overflowY: 'auto' }}>
-
       {/* ── Avatar ── */}
       <div className="lb-avatar-section">
-        <Ladybug />
+        <div className="lb-avatar-wrap">
+          <Ladybug wings={colors.wings} dots={colors.dots} />
+          <button
+            type="button"
+            className={`lb-pencil${editingLook ? ' on' : ''}`}
+            onClick={() => setEditingLook((v) => !v)}
+            aria-label="Personalizează buburuza"
+            aria-pressed={editingLook}
+            title="Personalizează buburuza"
+          >✏️</button>
+        </div>
         <span className="lb-badge">🐞 Ladybug</span>
         <span className="lb-username">{editName || name}</span>
       </div>
+      {editingLook && (
+      <div className="lb-section" style={{ padding: '12px', gap: '8px' }}>
+        <h2 className="lb-section-title">Personalizează buburuza</h2>
+        <p className="lb-sub-text">{isGuest ? 'Culorile rămân doar pe acest dispozitiv.' : 'Prietenii tăi vor vedea buburuza ta în aceste culori.'}</p>
+        {colorError && <div className="lb-msg bad" role="alert">Nu am putut salva culorile pentru prieteni: {colorError}</div>}
+        <ColorRow label="Aripi"  value={colors.wings} presets={WING_PRESETS} onChange={(c) => setColor('wings', c)} />
+        <ColorRow label="Buline" value={colors.dots}  presets={DOT_PRESETS}  onChange={(c) => setColor('dots', c)} />
+        <button type="button" className="lb-btn outline" onClick={resetColors}>Resetează culorile</button>
+        <button type="button" className="lb-btn" onClick={() => setEditingLook(false)}>Gata</button>
+      </div>
+      )}
 
       {/* ── Profile ── */}
       <div className="lb-section" style={{ padding: '12px', gap: '8px' }}>
@@ -169,6 +230,18 @@ export default function AccountPage({ name, uid, isAuthenticated, onLogin, onLog
             placeholder="Your name"
             value={editName}
             onChange={(e) => setEditName(e.target.value)}
+          />
+        </div>
+
+        <div className="lb-field-row">
+          <span className="lb-field-accent" />
+          <label className="lb-field-label">Email</label>
+          <input
+            className="lb-input"
+            type="email"
+            value={email || ''}
+            readOnly
+            style={{ opacity: 0.6, cursor: 'default' }}
           />
         </div>
 
@@ -197,71 +270,18 @@ export default function AccountPage({ name, uid, isAuthenticated, onLogin, onLog
           </div>
         </div>
 
-        {saveState === 'error' && saveError && (
-          <p style={{ color: '#c62828', margin: 0, fontSize: '0.85rem' }}>{saveError}</p>
+        {saveError && (
+          <div style={{ color: '#ff6b6b', fontSize: '0.83rem', padding: '6px 0' }}>
+            {saveError}
+          </div>
         )}
 
-        <button className="lb-btn" onClick={save} disabled={saveState === 'saving'}>
-          {saveState === 'saving' ? 'Saving…' : saveState === 'ok' ? '✓ Saved' : 'Save'}
+        <button className="lb-btn" onClick={save} disabled={saving}>
+          {saving ? 'Saving…' : saved ? '✓ Saved' : 'Save'}
         </button>
       </div>
 
-      {/* ── Trusted Contacts ── */}
-      <div className="lb-section" style={{ padding: '12px', gap: '8px' }}>
-        <h2 className="lb-section-title">🐞 Trusted Contacts</h2>
-
-        {/* Received invitations */}
-        {received.length > 0 && (
-          <>
-            <p className="lb-sub-text" style={{ fontWeight: 600, margin: 0 }}>Received invitations</p>
-            {received.map((c) => (
-              <div className="lb-friend-card" key={c.id}>
-                <MiniBug />
-                <div className="lb-friend-info">
-                  <b>{c.senderName || c.senderEmail || c.senderId}</b>
-                  <small style={{ textTransform: 'capitalize' }}>{(c.status || '').toLowerCase()}</small>
-                </div>
-                <div style={{ display: 'flex', gap: 4 }}>
-                  {c.status === 'PENDING' && (
-                    <button className="lb-btn-sm" onClick={() => acceptContact(c.id)}>Accept</button>
-                  )}
-                  <button className="lb-friend-remove" onClick={() => deleteContact(c.id)}>✕</button>
-                </div>
-              </div>
-            ))}
-          </>
-        )}
-
-        {/* Sent invitations */}
-        <p className="lb-sub-text" style={{ fontWeight: 600, margin: 0 }}>Sent invitations</p>
-        {sent.length === 0 && <p className="lb-empty">No contacts yet.</p>}
-        {sent.map((c) => (
-          <div className="lb-friend-card" key={c.id}>
-            <MiniBug />
-            <div className="lb-friend-info">
-              <b>{c.contactName || c.contactEmail || c.contactId}</b>
-              <small style={{ textTransform: 'capitalize' }}>{(c.status || '').toLowerCase()}</small>
-            </div>
-            <button className="lb-friend-remove" onClick={() => deleteContact(c.id)}>✕</button>
-          </div>
-        ))}
-
-        {/* Add contact */}
-        <div className="lb-friend-add">
-          <input
-            className="lb-input"
-            type="email"
-            inputMode="email"
-            placeholder="friend@example.com"
-            value={cEmail}
-            onChange={(e) => { setCEmail(e.target.value); setCError(null); }}
-          />
-          {cError && <p style={{ color: '#c62828', margin: 0, fontSize: '0.85rem' }}>{cError}</p>}
-          <button className="lb-btn" onClick={addContact} disabled={cBusy}>
-            {cBusy ? 'Sending…' : '＋ Add contact'}
-          </button>
-        </div>
-      </div>
+      <FriendsSection uid={uid} isGuest={isGuest} />
 
       {/* ── Actions ── */}
       <div className="lb-section" style={{ padding: '12px', gap: '8px' }}>

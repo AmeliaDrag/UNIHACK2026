@@ -4,6 +4,7 @@
  * Nu atinge conținutul paginii — fiecare pagină își păstrează propriul fundal/decorații.
  */
 import { useState } from 'react';
+import { useUnread } from './unread';
 
 const LADYBUG_SVG = (
   <svg viewBox="0 0 36 40" width="34" height="38" aria-hidden="true">
@@ -24,7 +25,7 @@ const LADYBUG_SVG = (
 );
 
 export default function AppShell({
-  title = 'LadyMap',
+  title = 'Buburu',
   active = 'home',
   onNav,
   children,
@@ -32,6 +33,7 @@ export default function AppShell({
   showFab = true,
 }) {
   const [open, setOpen] = useState(false);
+  const unread = useUnread();
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}>
@@ -72,6 +74,16 @@ export default function AppShell({
           onClick={() => onNav('home')}
         >
           🗺<span>Hartă</span>
+        </button>
+        <button
+          className={active === 'chat' ? 'on' : ''}
+          onClick={() => onNav('chat')}
+        >
+          <span className="nav-ico">
+            💬
+            {unread.total > 0 && <i className="nav-dot" aria-label={`${unread.total} mesaje noi`} />}
+          </span>
+          <span>Chat</span>
         </button>
         <button
           className={`hp-nav-lb${active === 'account' ? ' on' : ''}`}

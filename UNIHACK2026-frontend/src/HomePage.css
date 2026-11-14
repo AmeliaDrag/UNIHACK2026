@@ -150,16 +150,63 @@
 }
 .active-pick { border-color: #c62828 !important; color: #c62828 !important; }
 
-/* Route warning and note boxes */
-.rt-warning {
-  background: #2a1800; color: #fbbf24;
-  padding: 8px 12px; border-radius: 10px;
-  font-size: .82rem; margin-bottom: 4px;
-  border-left: 3px solid #fbbf24;
+/* ── 24/7 shops: highlighted markers + map toggle ── */
+.shop24 {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: #00c853; border: 3px solid #fff; color: #fff;
+  font: 800 13px system-ui, sans-serif;
+  box-shadow: 0 0 0 0 rgba(0, 200, 83, .7), 0 2px 8px rgba(0, 0, 0, .5);
+  animation: shop24-pulse 2s infinite;
 }
-.rt-note {
-  background: #111; color: #9a9db8;
-  padding: 8px 12px; border-radius: 10px;
-  font-size: .82rem; margin-bottom: 4px;
-  border-left: 3px solid #444;
+.shop24.mini { width: 22px; height: 22px; border-width: 2px; font-size: 9px; animation: none; box-shadow: none; flex-shrink: 0; }
+@keyframes shop24-pulse {
+  0%   { box-shadow: 0 0 0 0   rgba(0, 200, 83, .7), 0 2px 8px rgba(0, 0, 0, .5); }
+  70%  { box-shadow: 0 0 0 14px rgba(0, 200, 83, 0), 0 2px 8px rgba(0, 0, 0, .5); }
+  100% { box-shadow: 0 0 0 0   rgba(0, 200, 83, 0), 0 2px 8px rgba(0, 0, 0, .5); }
+}
+.shops-toggle {
+  position: absolute; left: 12px; bottom: 84px; z-index: 1000;
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; border-radius: 999px;
+  border: 2px solid var(--mut); background: var(--card); color: var(--fg);
+  font: 700 .8rem system-ui, sans-serif; cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .35);
+}
+.shops-toggle.on { border-color: #00c853; }
+.shops-toggle:not(.on) .shop24.mini { background: var(--mut); }
+/* ── Live location ── */
+.locate-btn {
+  position: absolute; left: 12px; bottom: 134px; z-index: 1000;
+  width: 44px; height: 44px; border-radius: 50%;
+  border: 2px solid var(--mut); background: var(--card); color: var(--fg);
+  font-size: 1.2rem; cursor: pointer; display: grid; place-items: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .35);
+}
+.locate-btn.on { border-color: #1e88e5; box-shadow: 0 0 0 3px rgba(30, 136, 229, .35), 0 2px 10px rgba(0, 0, 0, .35); }
+.locate-btn:disabled { opacity: .5; cursor: default; }
+.geo-warn {
+  position: absolute; left: 12px; right: 12px; top: 64px; z-index: 1000;
+  padding: 8px 12px; border-radius: 10px; font-size: .8rem;
+  background: rgba(239, 83, 80, .95); color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .35);
+}
+/* ── Chat notification: glowing dot on the corner of the Chat icon ── */
+.nav-ico { position: relative; display: inline-block; line-height: 1; font-size: 1.25rem; }
+.nav-dot {
+  position: absolute; top: -4px; right: -9px;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: #ff1744; border: 2px solid #111;
+  box-shadow: 0 0 6px 2px rgba(255, 23, 68, .9);
+  animation: nav-dot-glow 1.4s ease-in-out infinite;
+}
+@keyframes nav-dot-glow {
+  0%, 100% { box-shadow: 0 0 4px 1px rgba(255, 23, 68, .7); transform: scale(1); }
+  50%      { box-shadow: 0 0 12px 5px rgba(255, 23, 68, 1); transform: scale(1.18); }
+}
+.chat-badge {
+  min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px;
+  display: inline-grid; place-items: center;
+  background: #ff1744; color: #fff; font-size: .72rem; font-weight: 800;
+  box-shadow: 0 0 8px rgba(255, 23, 68, .8);
 }

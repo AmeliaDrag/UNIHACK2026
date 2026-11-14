@@ -29,6 +29,8 @@ public class UserMapper {
                 .name(user.getName())
                 .email(user.getEmail())
                 .phoneNumber(user.getPhoneNumber())
+                .wingColor(user.getWingColor())
+                .dotColor(user.getDotColor())
                 .build();
     }
 
@@ -41,5 +43,9 @@ public class UserMapper {
 
         if (dto.phoneNumber() != null)
             user.setPhoneNumber(dto.phoneNumber());
+        if (dto.wingColor() != null)
+            user.setWingColor(dto.wingColor().toLowerCase(java.util.Locale.ROOT));
+        if (dto.dotColor() != null)
+            user.setDotColor(dto.dotColor().toLowerCase(java.util.Locale.ROOT));
     }
 }
