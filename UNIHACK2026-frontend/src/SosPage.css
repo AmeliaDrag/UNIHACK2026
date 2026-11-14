@@ -1,0 +1,141 @@
+/* Pagina SOS: toate clasele au prefixul sos- */
+/* Culorile sunt luate din tema echipei (HomePage.css) */
+.sos-page {
+  --sos-red: #c62828;
+  --sos-red-dark: #a12323;
+  --sos-red-light: #ff4444;
+  --sos-text: #111;
+  --sos-bg-top: #fff6f7;
+  --sos-bg-bottom: #fdecee;
+  --sos-surface: #fff5f6;
+  --sos-border: #f2c4c7;
+
+  position: relative;
+  overflow: hidden;
+  min-height: 75vh;
+  border-radius: 24px;
+  background: linear-gradient(180deg, var(--sos-bg-top), var(--sos-bg-bottom));
+  color: var(--sos-text);
+}
+
+.sos-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  min-height: 75vh;
+  padding: 24px;
+  text-align: center;
+}
+
+/* Buline decorative */
+.sos-dot {
+  position: absolute;
+  z-index: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle at 35% 30%, var(--sos-red-light), var(--sos-red-dark));
+  box-shadow: 0 6px 12px rgba(161, 35, 35, 0.25);
+}
+.sos-dot.spots {
+  background:
+    radial-gradient(circle at 25% 60%, #111 0 11%, transparent 12%),
+    radial-gradient(circle at 70% 30%, #111 0 9%, transparent 10%),
+    radial-gradient(circle at 60% 75%, #111 0 8%, transparent 9%),
+    radial-gradient(circle at 35% 30%, var(--sos-red-light), var(--sos-red-dark));
+}
+
+/* Butonul SOS */
+.sos-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: min(62vw, 260px);
+  aspect-ratio: 1;
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 3.4rem;
+  font-weight: 800;
+  cursor: pointer;
+  background: linear-gradient(180deg, var(--sos-red-light), var(--sos-red-dark));
+  box-shadow:
+    0 0 0 18px rgba(198, 40, 40, 0.18),
+    0 0 0 36px rgba(198, 40, 40, 0.08),
+    0 18px 30px rgba(161, 35, 35, 0.4);
+}
+.sos-btn:active { transform: scale(0.97); }
+
+/* Butonul „Partajează locația" */
+.sos-share {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 28px;
+  border: 2px solid var(--sos-border);
+  border-radius: 999px;
+  background: var(--sos-surface);
+  color: var(--sos-text);
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(161, 35, 35, 0.12);
+}
+
+/* Link 112 */
+.sos-call {
+  color: var(--sos-red);
+  font-weight: 700;
+  text-decoration: none;
+  border: 2px solid var(--sos-red);
+  border-radius: 999px;
+  padding: 8px 20px;
+  background: transparent;
+}
+
+/* Numărătoarea inversă */
+.sos-count {
+  font-size: 7rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--sos-red);
+}
+
+/* ── Adaosuri pentru pașii cu text și câmpuri (PIN, count, sent, fail) ── */
+.sos-content h2,
+.sos-content p { margin: 0; }
+.sos-content h2 { color: var(--sos-red); }
+
+.sos-note {
+  max-width: 280px;
+  color: #666;
+}
+
+.sos-content input {
+  width: min(100%, 280px);
+  padding: 12px 16px;
+  border: 2px solid var(--sos-border);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--sos-text);
+  font: inherit;
+  font-size: 1.1rem;
+  text-align: center;
+  box-sizing: border-box;
+}
+.sos-content input:focus {
+  outline: none;
+  border-color: var(--sos-red);
+}
+
+/* Butoanele .b și .g vin din styles.css; aici doar le dăm aer */
+.sos-content .b,
+.sos-content .g {
+  min-width: 200px;
+}
