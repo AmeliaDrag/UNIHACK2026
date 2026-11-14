@@ -139,6 +139,28 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   font-size: .78rem;
   color: var(--text-muted);
 }
+.dir-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 16px;
+  border-radius: 14px;
+  border: 2px solid var(--border);
+  background: var(--card);
+  color: var(--text-muted);
+  font-size: .82rem;
+  font-weight: 600;
+  transition: all .2s;
+  opacity: .4;
+}
+.dir-display-active {
+  border-color: var(--ac);
+  background: var(--ac);
+  color: #fff;
+  opacity: 1;
+  transform: scale(1.05);
+}
 .dir-compass {
   font-size: .72rem;
   color: var(--text-muted);
@@ -153,4 +175,30 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   background: var(--ac);
   color: #fff;
   margin-left: 6px;
+}
+
+/* ── AI analyze button ── */
+.ai-analyze-btn {
+  background: linear-gradient(135deg, #c62828, #880e4f) !important;
+  font-size: .88rem !important;
+}
+.ai-analyze-btn:disabled { opacity: .6; cursor: wait; }
+.dir-ai-error {
+  font-size: .8rem;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, .1);
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+.dir-manual {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.dir-manual-label {
+  font-size: .75rem;
+  color: var(--text-muted);
 }

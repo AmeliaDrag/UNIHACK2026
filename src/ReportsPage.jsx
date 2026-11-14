@@ -1,19 +1,10 @@
 import { useEffect, useState } from 'react';
 import { api } from './api';
+import { analyzeDirection } from './ai';
 
 const CATS = ['Poor lighting', 'Suspicious person', 'Isolated area', 'Damaged road', 'Other'];
-// Categories that need a direction indicator
 const NEEDS_DIRECTION = ['Suspicious person', 'Isolated area'];
 const OK = 3;
-
-// ── AI direction helper ─────────────────────────────────────────────────────
-// Uses the device compass heading to suggest which way the suspect is moving.
-// Heading 0-180 = generally east/right, 180-360 = generally west/left.
-// Returns 'left' | 'right' | null
-function suggestDirection(heading) {
-  if (heading === null || heading === undefined || isNaN(heading)) return null;
-  return heading < 180 ? 'right' : 'left';
-}
 
 function MiniBug({ size = 20 }) {
   return (
@@ -29,33 +20,14 @@ function MiniBug({ size = 20 }) {
   );
 }
 
-// ── Arrow icon for direction ────────────────────────────────────────────────
-function ArrowButton({ dir, active, onClick, label }) {
-  return (
-    <button
-      className={`dir-btn${active ? ' dir-btn-active' : ''}`}
-      onClick={onClick}
-      aria-label={label}
-    >
-      {dir === 'left' ? (
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-          <path d="M18 6 L8 14 L18 22" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-        </svg>
-      ) : (
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-          <path d="M10 6 L20 14 L10 22" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-        </svg>
-      )}
-    </button>
-  );
-}
-
 export default function ReportsPage({ uid, isMod, reports, pos, reload }) {
-  const [cat, setCat]     = useState(CATS[0]);
-  const [text, setText]   = useState('');
-  const [anon, setAnon]   = useState(false);
-  const [direction, setDirection] = useState(null);  // 'left' | 'right' | null
+  const [cat, setCat]         = useState(CATS[0]);
+  const [text, setText]       = useState('');
+  const [anon, setAnon]       = useState(false);
+  const [direction, setDirection] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState(null);
+  const [aiError, setAiError]     = useState(null);
 
   // Friends
   const [friends, setFriends] = useState([]);
@@ -65,19 +37,39 @@ export default function ReportsPage({ uid, isMod, reports, pos, reload }) {
   const loadFriends = () => api.listFriends(uid).then(setFriends).catch(() => {});
   useEffect(() => { loadFriends(); }, [uid]);
 
-  // ── AI: auto-suggest direction when GPS heading is available ──
+  // Reset direction when category changes
+  const onCatChange = (val) => {
+    setCat(val);
+    setDirection(null);
+    setAiSuggestion(null);
+    setAiError(null);
+  };
+
+  // ── AI: Auto-analyze text with Gemini (debounced 800ms after typing stops) ──
   useEffect(() => {
-    if (!NEEDS_DIRECTION.includes(cat)) {
-      setDirection(null);
-      setAiSuggestion(null);
-      return;
-    }
-    const suggested = suggestDirection(pos?.heading);
-    if (suggested && !direction) {
-      setDirection(suggested);
-      setAiSuggestion(suggested);
-    }
-  }, [cat, pos?.heading]);
+    if (!NEEDS_DIRECTION.includes(cat)) return;
+    if (!text.trim() || text.trim().length < 3) return;
+
+    const timer = setTimeout(async () => {
+      setAiLoading(true);
+      setAiError(null);
+      try {
+        const result = await analyzeDirection(text.trim());
+        if (result) {
+          setDirection(result);
+          setAiSuggestion(result);
+        } else {
+          setAiSuggestion(null);
+        }
+      } catch {
+        setAiError('AI analysis failed — pick direction manually.');
+      } finally {
+        setAiLoading(false);
+      }
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [cat, text]);
 
   const addFriend = async () => {
     if (!fName.trim()) return alert('Enter a friend name.');
@@ -100,7 +92,7 @@ export default function ReportsPage({ uid, isMod, reports, pos, reload }) {
   const send = () => {
     if (!pos) return alert('Enable location to report.');
     if (NEEDS_DIRECTION.includes(cat) && !direction) {
-      return alert('Please select the direction the suspect is moving.');
+      return alert('Write a description so the AI can detect the direction.');
     }
     act(async () => {
       await api.addReport({
@@ -113,6 +105,7 @@ export default function ReportsPage({ uid, isMod, reports, pos, reload }) {
       setText('');
       setDirection(null);
       setAiSuggestion(null);
+      setAiError(null);
     });
   };
 
@@ -123,14 +116,14 @@ export default function ReportsPage({ uid, isMod, reports, pos, reload }) {
       {/* ── Report ── */}
       <div className="lb-section">
         <h2 className="lb-section-title">Report a problem</h2>
-        <select className="lb-input" value={cat} onChange={(e) => { setCat(e.target.value); setDirection(null); setAiSuggestion(null); }}>
+        <select className="lb-input" value={cat} onChange={(e) => onCatChange(e.target.value)}>
           {CATS.map((c) => <option key={c}>{c}</option>)}
         </select>
         <textarea
           className="lb-input"
           placeholder="What's happening? (optional)"
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={(e) => { setText(e.target.value); setAiSuggestion(null); setAiError(null); }}
           rows={3}
         />
 
@@ -138,23 +131,32 @@ export default function ReportsPage({ uid, isMod, reports, pos, reload }) {
         {showDirection && (
           <div className="dir-picker">
             <div className="dir-label">
-              🤖 Which way is the suspect moving?
-              {aiSuggestion && (
+              🤖 {aiLoading ? 'AI analyzing your description…' : 'Which way is the suspect moving?'}
+              {aiSuggestion && !aiLoading && (
                 <span className="dir-ai-hint">
-                  AI suggests: {aiSuggestion === 'left' ? '⬅ left' : 'right ➡'}
+                  ✅ AI detected: {aiSuggestion === 'left' ? '⬅ left' : 'right ➡'}
                 </span>
               )}
             </div>
+
+            {aiError && <div className="dir-ai-error">{aiError}</div>}
+
+            {/* Direction display */}
             <div className="dir-buttons">
-              <ArrowButton dir="left" active={direction === 'left'} onClick={() => setDirection('left')} label="Moving left" />
+              <div className={`dir-display${direction === 'left' ? ' dir-display-active' : ''}`}>
+                <svg width="32" height="32" viewBox="0 0 28 28" fill="none">
+                  <path d="M18 6 L8 14 L18 22" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                </svg>
+                <span>Left</span>
+              </div>
               <span className="dir-or">or</span>
-              <ArrowButton dir="right" active={direction === 'right'} onClick={() => setDirection('right')} label="Moving right" />
+              <div className={`dir-display${direction === 'right' ? ' dir-display-active' : ''}`}>
+                <svg width="32" height="32" viewBox="0 0 28 28" fill="none">
+                  <path d="M10 6 L20 14 L10 22" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                </svg>
+                <span>Right</span>
+              </div>
             </div>
-            {pos?.heading != null && !isNaN(pos?.heading) && (
-              <small className="dir-compass">
-                🧭 Compass: {Math.round(pos.heading)}°
-              </small>
-            )}
           </div>
         )}
 
