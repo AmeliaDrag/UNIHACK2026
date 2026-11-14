@@ -1,14 +1,25 @@
 /**
- * auth.js — thin session wrapper over Auth0, with optional guest mode.
+ * auth.js — session wrapper with dev-mode bypass, Auth0, and guest mode.
  *
- * useSession() returns { isLoading, isAuthenticated, user, login, logout, enterGuest, isGuest }
+ * VITE_AUTH_MODE=dev  → mock session, no Auth0 calls (default)
+ * VITE_AUTH_MODE=auth → full Auth0 flow
  *
- * Guest mode is controlled by VITE_GUEST_ENABLED=true in .env.
- * To disable it before production: set VITE_GUEST_ENABLED=false or remove the line.
+ * useSession() returns:
+ *   { isLoading, isAuthenticated, isGuest, user, backendProfile,
+ *     login, logout, enterGuest, guestEnabled, getAccessToken }
+ *
+ * The exported `useSession` is fixed at module-load time to either the dev
+ * or the auth0 implementation. This means it satisfies the Rules of Hooks
+ * (the same hook function is called on every render) while never calling
+ * useAuth0() in dev mode where Auth0Provider is absent from the tree.
  */
-import { useAuth0 } from '@auth0/auth0-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { config } from './config';
+import { api } from './api';
+
+// Auth0 is a static import — the bundle includes it regardless, but
+// useAuth0() is only *called* when authMode === 'auth' (see bottom of file).
+import { useAuth0 } from '@auth0/auth0-react';
 
 // Stable guest ID persisted across page refreshes
 function getGuestId() {
@@ -20,14 +31,69 @@ function getGuestId() {
   return id;
 }
 
-export function useSession() {
-  const { isLoading, isAuthenticated, user, loginWithRedirect, logout: auth0Logout } = useAuth0();
-  const [isGuest, setIsGuest] = useState(() => !!localStorage.getItem('guest'));
+// ── Dev-mode hook (no Auth0) ────────────────────────────────────────────────
+function useDevSession() {
+  const [backendProfile, setBackendProfile] = useState(null);
+  const [profileError,   setProfileError]   = useState(null);
+  const fetched = useRef(false);
 
-  const enterGuest = () => {
-    localStorage.setItem('guest', '1');
-    setIsGuest(true);
+  useEffect(() => {
+    if (fetched.current) return;
+    fetched.current = true;
+    api.getMe()
+      .then(setBackendProfile)
+      .catch((e) => setProfileError(e.message));
+  }, []);
+
+  return {
+    isLoading: false,
+    isAuthenticated: true,
+    isGuest: false,
+    user: {
+      sub:   'dev-user',
+      name:  'Dev User',
+      email: 'ana@test.com',
+      'https://safewalk.app/roles': [],
+    },
+    backendProfile,
+    profileError,
+    getAccessToken: async () => null,
+    login:      () => {},
+    logout:     () => {},
+    enterGuest: () => {},
+    guestEnabled: config.guestEnabled,
   };
+}
+
+// ── Auth0 hook ──────────────────────────────────────────────────────────────
+function useAuth0Session() {
+  const {
+    isLoading,
+    isAuthenticated,
+    user,
+    loginWithRedirect,
+    logout: auth0Logout,
+    getAccessTokenSilently,
+  } = useAuth0();
+
+  const [isGuest, setIsGuest] = useState(() => !!localStorage.getItem('guest'));
+  const [backendProfile, setBackendProfile] = useState(null);
+  const [profileError,   setProfileError]   = useState(null);
+  const fetched = useRef(false);
+
+  const getAccessToken = () =>
+    getAccessTokenSilently({
+      authorizationParams: { audience: config.auth0Audience },
+    });
+
+  // Once Auth0 login succeeds, fetch backend profile once
+  useEffect(() => {
+    if (!isAuthenticated || isGuest || fetched.current) return;
+    fetched.current = true;
+    api.getMe()
+      .then(setBackendProfile)
+      .catch((e) => setProfileError(e.message));
+  }, [isAuthenticated, isGuest]);
 
   const logout = () => {
     if (isGuest) {
@@ -41,18 +107,20 @@ export function useSession() {
   if (isGuest) {
     return {
       isLoading: false,
-      isAuthenticated: true,   // treat guest as authenticated so the app renders
+      isAuthenticated: true,
       isGuest: true,
       user: {
         sub:   getGuestId(),
-        name:  'Vizitator',
+        name:  'Guest',
         email: null,
-        // guests have no roles
         'https://safewalk.app/roles': [],
       },
-      login:      () => {},    // no-op while in guest mode
+      backendProfile: null,
+      profileError:   null,
+      getAccessToken: async () => null,
+      login:      () => {},
       logout,
-      enterGuest: () => {},    // already in guest mode
+      enterGuest: () => {},
       guestEnabled: config.guestEnabled,
     };
   }
@@ -62,9 +130,22 @@ export function useSession() {
     isAuthenticated,
     isGuest: false,
     user: isAuthenticated ? user : null,
-    login:        () => loginWithRedirect(),
+    backendProfile,
+    profileError,
+    getAccessToken,
+    login:      () => loginWithRedirect(),
     logout,
-    enterGuest,
+    enterGuest: () => {
+      localStorage.setItem('guest', '1');
+      setIsGuest(true);
+    },
     guestEnabled: config.guestEnabled,
   };
 }
+
+// ── Public export ────────────────────────────────────────────────────────────
+// config.authMode is a constant (read from import.meta.env at build time),
+// so this ternary is resolved once at module load — the same function is
+// always returned, satisfying the Rules of Hooks.
+export const useSession =
+  config.authMode === 'auth' ? useAuth0Session : useDevSession;

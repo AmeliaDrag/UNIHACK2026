@@ -1,7 +1,9 @@
 import { createRoot } from 'react-dom/client';
 import { Auth0Provider } from '@auth0/auth0-react';
 import { missingVars, config } from './config';
+import { api } from './api';
 import App from './App';
+import { useState } from 'react';
 
 /** Full-screen error shown when required env vars are absent. */
 function ConfigError({ missing }) {
@@ -11,10 +13,10 @@ function ConfigError({ missing }) {
       fontFamily: 'system-ui, sans-serif', padding: '24px', textAlign: 'center',
     }}>
       <div>
-        <h1 style={{ fontSize: '1.4rem', marginBottom: '12px' }}>Configurare lipsă</h1>
+        <h1 style={{ fontSize: '1.4rem', marginBottom: '12px' }}>Missing configuration</h1>
         <p style={{ color: '#666', marginBottom: '16px' }}>
-          Aplicația nu poate porni. Adaugă variabilele de mai jos în fișierul <code>.env</code>
-          {' '}și repornește serverul.
+          The app cannot start. Add the variables below to your <code>.env</code> file
+          and restart the dev server.
         </p>
         <ul style={{ listStyle: 'none', padding: 0, display: 'grid', gap: '6px' }}>
           {missing.map((v) => (
@@ -32,11 +34,9 @@ function ConfigError({ missing }) {
 }
 
 /**
- * Pe desktop (>600px lățime) învelește aplicația într-un cadru de telefon.
- * Pe un telefon real ocupă tot ecranul — cadrul dispare.
+ * On desktop (>600px wide) wraps the app in a phone frame.
+ * On a real phone it fills the whole screen.
  */
-import { useState } from 'react';
-
 const VIEW_KEY = 'sf-view-mode';
 
 function PhoneFrame({ children }) {
@@ -93,7 +93,7 @@ function PhoneFrame({ children }) {
         }
         .sf-screen { width: 100%; height: 100%; overflow: hidden; border-radius: 44px; }
 
-        /* ── Modul Desktop: fără cadru, pe tot ecranul ── */
+        /* Desktop mode: no frame, full screen */
         .sf-desktop.is-desktop {
           background: none;
           padding: 0;
@@ -110,7 +110,7 @@ function PhoneFrame({ children }) {
         .is-desktop .sf-frame::after { display: none; }
         .is-desktop .sf-screen { border-radius: 0; }
 
-        /* Pe telefon real: mereu pe tot ecranul, fără buton */
+        /* On real phones: always full screen, hide the toggle */
         @media (max-width: 600px) {
           .sf-desktop { background: none; padding: 0; display: block; min-height: unset; }
           .sf-frame { width: 100vw; height: 100dvh; border-radius: 0; box-shadow: none; }
@@ -119,7 +119,6 @@ function PhoneFrame({ children }) {
           .sf-view-toggle { display: none !important; }
         }
 
-        /* Butonul de schimbare */
         .sf-view-toggle {
           position: fixed;
           top: 12px; right: 12px;
@@ -137,9 +136,9 @@ function PhoneFrame({ children }) {
       <button
         className="sf-view-toggle"
         onClick={toggle}
-        aria-label="Schimbă aspectul"
+        aria-label="Toggle layout"
       >
-        {mode === 'phone' ? '🖥 Desktop' : '📱 Telefon'}
+        {mode === 'phone' ? '🖥 Desktop' : '📱 Phone'}
       </button>
 
       <div className={`sf-desktop ${mode === 'desktop' ? 'is-desktop' : ''}`}>
@@ -155,7 +154,9 @@ const root = createRoot(document.getElementById('root'));
 
 if (missingVars.length > 0) {
   root.render(<ConfigError missing={missingVars} />);
-} else {
+} else if (config.authMode === 'auth') {
+  // Auth mode: wire up token getter after Auth0Provider mounts
+  // api.init is called inside useSession (auth0 mode) via HomePage
   root.render(
     <Auth0Provider
       domain={config.auth0Domain}
@@ -165,10 +166,18 @@ if (missingVars.length > 0) {
         redirect_uri: window.location.origin,
         audience: config.auth0Audience,
       }}
+      onRedirectCallback={() => {}}
     >
       <PhoneFrame>
         <App />
       </PhoneFrame>
     </Auth0Provider>
+  );
+} else {
+  // Dev mode: no Auth0Provider needed
+  root.render(
+    <PhoneFrame>
+      <App />
+    </PhoneFrame>
   );
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSession } from './auth';
 import { api } from './api';
 import { useGeo } from './useGeo';
@@ -17,16 +17,99 @@ import './HomePage.css';
 import './styles.css';
 
 const ROLES = 'https://safewalk.app/roles';
+const SOS_POLL_MS = 10_000;
+
+// ── Received SOS banner ──────────────────────────────────────────────────────
+function ReceivedSosBanner({ alerts, onResolve }) {
+  if (!alerts || alerts.length === 0) return null;
+  return (
+    <div style={{
+      position: 'absolute', top: 0, left: 0, right: 0, zIndex: 9000,
+      background: '#c62828', color: '#fff',
+      padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: 6,
+    }}>
+      {alerts.map((a) => (
+        <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <span style={{ fontWeight: 700 }}>🚨 SOS</span>
+          <span style={{ fontSize: '0.85rem' }}>
+            from {a.senderName || a.senderId || 'unknown'} · {a.status}
+          </span>
+          {a.latitude != null && (
+            <span style={{ fontSize: '0.78rem', opacity: 0.85 }}>
+              ({a.latitude.toFixed(4)}, {a.longitude.toFixed(4)})
+            </span>
+          )}
+          {a.status !== 'RESOLVED' && (
+            <button
+              style={{
+                marginLeft: 'auto', background: 'transparent', border: '1px solid #fff',
+                color: '#fff', borderRadius: 6, padding: '2px 8px', cursor: 'pointer',
+                fontSize: '0.78rem',
+              }}
+              onClick={() => onResolve(a.id)}
+            >
+              Resolve
+            </button>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function App() {
   const { isLoading, isAuthenticated, user, login, logout, enterGuest, guestEnabled } = useSession();
-  const [page, setPage] = useState('home');
+  const [page, setPage]       = useState('home');
   const [reports, setReports] = useState([]);
+  const [receivedSos, setReceivedSos] = useState([]);
   const pos = useGeo();
   const { theme, cycleTheme } = useTheme();
 
+  const inFlight = useRef(false);
+
   const reload = () => api.listReports().then(setReports).catch((e) => console.error(e));
   useEffect(() => { if (isAuthenticated) reload(); }, [isAuthenticated]);
+
+  // ── Received SOS polling — 10 s, no overlapping requests ──
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const poll = async () => {
+      if (inFlight.current) return;
+      inFlight.current = true;
+      try {
+        const data = await api.getReceivedSos();
+        if (Array.isArray(data)) {
+          setReceivedSos((prev) => {
+            // Reconcile by id; replace whole list each cycle
+            const incoming = data.filter((a) => a.status !== 'RESOLVED');
+            // Preserve any we already knew about that the server no longer returns (edge case)
+            return incoming;
+          });
+        }
+      } catch {
+        // fail silently — don't spam the user
+      } finally {
+        inFlight.current = false;
+      }
+    };
+
+    poll();
+    const timer = setInterval(poll, SOS_POLL_MS);
+    return () => {
+      clearInterval(timer);
+      inFlight.current = false;
+    };
+  }, [isAuthenticated]);
+
+  const resolveReceivedSos = async (id) => {
+    try {
+      await api.resolveSos(id);
+      setReceivedSos((prev) => prev.filter((a) => a.id !== id));
+    } catch (e) {
+      alert('Could not resolve alert: ' + e.message);
+    }
+  };
 
   const track = new URLSearchParams(location.search).get('track');
   if (track) return <TrackPage id={track} />;
@@ -54,10 +137,16 @@ export default function App() {
     account: 'My Account',
   };
 
+  // Received SOS banner (shown on all pages when active alerts exist)
+  const sosBanner = (
+    <ReceivedSosBanner alerts={receivedSos} onResolve={resolveReceivedSos} />
+  );
+
   // ── Home: RouteTab with own dropdown ──
   if (page === 'home')
     return (
       <div className="app" style={{ position: 'relative' }}>
+        {sosBanner}
         <RouteTab userPos={pos} reports={reports} />
 
         <div className="fab-group">
@@ -93,6 +182,7 @@ export default function App() {
   if (page === 'sos')
     return (
       <div className="app" style={{ position: 'relative', display: 'flex', flexDirection: 'column', height: '100%' }}>
+        {sosBanner}
         <div style={{ flex: 1, minHeight: 0, position: 'relative' }}>
           {secure(<SosPage uid={uid} pos={pos} onShare={() => setPage('share')} />)}
         </div>
@@ -124,7 +214,7 @@ export default function App() {
   if (page === 'account')
     return (
       <div className="app" style={{ position: 'relative', display: 'flex', flexDirection: 'column', height: '100%' }}>
-        {/* Theme switcher button — top right */}
+        {sosBanner}
         <button
           onClick={cycleTheme}
           className="theme-switch"
@@ -176,7 +266,8 @@ export default function App() {
 
   return (
     <AppShell title={titles[page] || 'LadyMap'} active={page} onNav={nav} showFab={page !== 'reports'}>
-      {page === 'reports' && secure(<ReportsPage uid={uid} isMod={isMod} reports={reports} pos={pos} reload={reload} />)}
+      {sosBanner}
+      {page === 'reports' && secure(<ReportsPage pos={pos} reports={reports} reload={reload} />)}
       {page === 'share'   && secure(<SharePage uid={uid} pos={pos} />)}
       {page === 'chat'    && secure(<ChatPage uid={uid} userName={name} />)}
     </AppShell>

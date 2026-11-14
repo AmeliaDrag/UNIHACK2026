@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from './api';
+import { useSession } from './auth';
 import './AccountPage.css';
 
 const COUNTRY_CODES = [
@@ -50,37 +51,90 @@ function MiniBug({ size = 22 }) {
   );
 }
 
+// Split a full phone number like "+40712345678" into code + local
+function splitPhone(full) {
+  if (!full) return { code: '+40', local: '' };
+  for (const c of COUNTRY_CODES.sort((a, b) => b.code.length - a.code.length)) {
+    if (full.startsWith(c.code)) {
+      return { code: c.code, local: full.slice(c.code.length) };
+    }
+  }
+  return { code: '+40', local: full };
+}
+
 export default function AccountPage({ name, uid, isAuthenticated, onLogin, onLogout, onGoShare, onGoChat }) {
+  const { backendProfile } = useSession();
+
+  // Profile fields — seed from backendProfile when it loads
   const [editName,    setEditName]    = useState(name || '');
   const [countryCode, setCountryCode] = useState('+40');
   const [phoneLocal,  setPhoneLocal]  = useState('');
-  const [saved,       setSaved]       = useState(false);
+  const [saveState,   setSaveState]   = useState('idle'); // idle | saving | ok | error
+  const [saveError,   setSaveError]   = useState(null);
 
-  // Prieteni
-  const [friends,   setFriends]  = useState([]);
-  const [fName,     setFName]    = useState('');
-  const [fPhone,    setFPhone]   = useState('');
+  useEffect(() => {
+    if (!backendProfile) return;
+    if (backendProfile.name)        setEditName(backendProfile.name);
+    if (backendProfile.phoneNumber) {
+      const { code, local } = splitPhone(backendProfile.phoneNumber);
+      setCountryCode(code);
+      setPhoneLocal(local);
+    }
+  }, [backendProfile]);
 
-  const loadFriends = () => { if (uid) api.listFriends(uid).then(setFriends).catch(() => {}); };
-  useEffect(() => { loadFriends(); }, [uid]);
+  // ── Trusted contacts ──
+  const [sent,     setSent]     = useState([]);
+  const [received, setReceived] = useState([]);
+  const [cEmail,   setCEmail]   = useState('');
+  const [cBusy,    setCBusy]    = useState(false);
+  const [cError,   setCError]   = useState(null);
 
-  const addFriend = async () => {
-    if (!fName.trim()) return alert('Enter a friend name.');
+  const loadContacts = () => {
+    if (!uid) return;
+    api.getSentContacts().then(setSent).catch(() => {});
+    api.getReceivedContacts().then(setReceived).catch(() => {});
+  };
+  useEffect(() => { loadContacts(); }, [uid]);
+
+  const addContact = async () => {
+    if (!cEmail.trim()) return setCError('Enter an email address.');
+    setCBusy(true); setCError(null);
     try {
-      await api.addFriend({ uid, name: fName.trim(), phone: fPhone.trim() || null });
-      setFName(''); setFPhone('');
-      loadFriends();
-    } catch (e) { alert(e.message); }
+      await api.addContact({ contactEmail: cEmail.trim() });
+      setCEmail('');
+      loadContacts();
+    } catch (e) {
+      setCError(e.message);
+    } finally {
+      setCBusy(false);
+    }
   };
 
-  const removeFriend = async (id) => {
-    try { await api.removeFriend(id); loadFriends(); }
+  const deleteContact = async (id) => {
+    try { await api.deleteContact(id); loadContacts(); }
     catch (e) { alert(e.message); }
   };
 
-  const save = () => {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 1800);
+  const acceptContact = async (id) => {
+    try { await api.acceptContact(id); loadContacts(); }
+    catch (e) { alert(e.message); }
+  };
+
+  // ── Save profile ──
+  const save = async () => {
+    setSaveState('saving'); setSaveError(null);
+    try {
+      await api.updateMe({
+        name: editName.trim() || undefined,
+        phoneNumber: phoneLocal.trim() ? countryCode + phoneLocal.trim() : undefined,
+      });
+      setSaveState('ok');
+      setTimeout(() => setSaveState('idle'), 1800);
+    } catch (e) {
+      setSaveError(e.message);
+      setSaveState('error');
+      setTimeout(() => setSaveState('idle'), 3000);
+    }
   };
 
   if (!isAuthenticated)
@@ -94,6 +148,7 @@ export default function AccountPage({ name, uid, isAuthenticated, onLogin, onLog
 
   return (
     <div className="lb-page" style={{ alignItems: 'stretch', padding: '16px 16px 24px', gap: '12px', overflowY: 'auto' }}>
+
       {/* ── Avatar ── */}
       <div className="lb-avatar-section">
         <Ladybug />
@@ -142,33 +197,69 @@ export default function AccountPage({ name, uid, isAuthenticated, onLogin, onLog
           </div>
         </div>
 
-        <button className="lb-btn" onClick={save}>
-          {saved ? '✓ Saved' : 'Save'}
+        {saveState === 'error' && saveError && (
+          <p style={{ color: '#c62828', margin: 0, fontSize: '0.85rem' }}>{saveError}</p>
+        )}
+
+        <button className="lb-btn" onClick={save} disabled={saveState === 'saving'}>
+          {saveState === 'saving' ? 'Saving…' : saveState === 'ok' ? '✓ Saved' : 'Save'}
         </button>
       </div>
 
-      {/* ── Friends ── */}
+      {/* ── Trusted Contacts ── */}
       <div className="lb-section" style={{ padding: '12px', gap: '8px' }}>
-        <h2 className="lb-section-title">🐞 Ladybug Friends</h2>
+        <h2 className="lb-section-title">🐞 Trusted Contacts</h2>
 
-        <div className="lb-friend-list">
-          {friends.length === 0 && <p className="lb-empty">No friends yet.</p>}
-          {friends.map((f) => (
-            <div className="lb-friend-card" key={f.id}>
-              <MiniBug />
-              <div className="lb-friend-info">
-                <b>{f.name}</b>
-                {f.phone && <small>{f.phone}</small>}
+        {/* Received invitations */}
+        {received.length > 0 && (
+          <>
+            <p className="lb-sub-text" style={{ fontWeight: 600, margin: 0 }}>Received invitations</p>
+            {received.map((c) => (
+              <div className="lb-friend-card" key={c.id}>
+                <MiniBug />
+                <div className="lb-friend-info">
+                  <b>{c.senderName || c.senderEmail || c.senderId}</b>
+                  <small style={{ textTransform: 'capitalize' }}>{(c.status || '').toLowerCase()}</small>
+                </div>
+                <div style={{ display: 'flex', gap: 4 }}>
+                  {c.status === 'PENDING' && (
+                    <button className="lb-btn-sm" onClick={() => acceptContact(c.id)}>Accept</button>
+                  )}
+                  <button className="lb-friend-remove" onClick={() => deleteContact(c.id)}>✕</button>
+                </div>
               </div>
-              <button className="lb-friend-remove" onClick={() => removeFriend(f.id)}>✕</button>
-            </div>
-          ))}
-        </div>
+            ))}
+          </>
+        )}
 
+        {/* Sent invitations */}
+        <p className="lb-sub-text" style={{ fontWeight: 600, margin: 0 }}>Sent invitations</p>
+        {sent.length === 0 && <p className="lb-empty">No contacts yet.</p>}
+        {sent.map((c) => (
+          <div className="lb-friend-card" key={c.id}>
+            <MiniBug />
+            <div className="lb-friend-info">
+              <b>{c.contactName || c.contactEmail || c.contactId}</b>
+              <small style={{ textTransform: 'capitalize' }}>{(c.status || '').toLowerCase()}</small>
+            </div>
+            <button className="lb-friend-remove" onClick={() => deleteContact(c.id)}>✕</button>
+          </div>
+        ))}
+
+        {/* Add contact */}
         <div className="lb-friend-add">
-          <input className="lb-input" placeholder="Name" value={fName} onChange={(e) => setFName(e.target.value)} />
-          <input className="lb-input" placeholder="Phone (optional)" inputMode="tel" value={fPhone} onChange={(e) => setFPhone(e.target.value)} />
-          <button className="lb-btn" onClick={addFriend}>＋ Add friend</button>
+          <input
+            className="lb-input"
+            type="email"
+            inputMode="email"
+            placeholder="friend@example.com"
+            value={cEmail}
+            onChange={(e) => { setCEmail(e.target.value); setCError(null); }}
+          />
+          {cError && <p style={{ color: '#c62828', margin: 0, fontSize: '0.85rem' }}>{cError}</p>}
+          <button className="lb-btn" onClick={addContact} disabled={cBusy}>
+            {cBusy ? 'Sending…' : '＋ Add contact'}
+          </button>
         </div>
       </div>
 

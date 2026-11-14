@@ -4,12 +4,10 @@ export default {
   plugins: [react()],
   server: {
     proxy: {
-      // All /api/* requests → json-server on port 3001
-      // The /api prefix is stripped so json-server sees /reports, /contacts, etc.
-      '/api': {
-        target: 'http://localhost:3001',
+      // /api/v1/* → Spring Boot on port 8080, prefix kept intact
+      '/api/v1': {
+        target: 'http://localhost:8080',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
       },
       // Proxy Nominatim to avoid CORS issues in dev
       '/nominatim': {

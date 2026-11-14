@@ -7,7 +7,7 @@ const sha = async (s) =>
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('');
 
-/* Buline decorative (poziție, mărime, cu/fără puncte negre) */
+/* Decorative dots */
 const DOTS = [
   { t: '8%',  l: '12%',  s: 34 },
   { t: '4%',  l: '48%',  s: 30 },
@@ -48,43 +48,46 @@ export default function SosPage({ uid, pos, onShare }) {
     try { return JSON.parse(localStorage.getItem('pins') || 'null'); }
     catch { return null; }
   });
-  const [a, setA]     = useState('');
-  const [b, setB]     = useState('');
-  const [ph, setPh]   = useState('idle'); // idle | count | sent | fail
-  const [n, setN]     = useState(5);
-  const [pin, setPin] = useState('');
+  const [a,    setA]   = useState('');
+  const [b,    setB]   = useState('');
+  // ph: idle | count | sent | fail
+  const [ph,   setPh]  = useState('idle');
+  const [n,    setN]   = useState(3);
+  const [pin,  setPin] = useState('');
+  const [sentAlert, setSentAlert] = useState(null);  // { id, status }
   const au = useRef();
 
-  /* Oprește sirena și vibrația */
+  /* Stop siren and vibration */
   const hush = () => {
     try { au.current?.o.stop(); au.current?.c.close(); } catch {}
     au.current = null;
     navigator.vibrate?.(0);
   };
 
-  const fire = async (kind) => {
+  const fire = async () => {
     hush();
     try {
-      await api.sendAlert({ uid, kind, pos });
-      if (kind === 'sos') setPh('sent');
+      const result = await api.sendSos({ latitude: pos?.lat ?? 0, longitude: pos?.lng ?? 0 });
+      setSentAlert(result ? { id: result.id, status: result.status } : null);
+      setPh('sent');
     } catch {
-      if (kind === 'sos') setPh('fail');
+      setPh('fail');
     }
   };
 
-  /* Numărătoarea inversă */
+  /* 3-second countdown */
   useEffect(() => {
     if (ph !== 'count') return;
-    if (n <= 0) { fire('sos'); return; }
+    if (n <= 0) { fire(); return; }
     const t = setTimeout(() => setN(n - 1), 1000);
     return () => clearTimeout(t);
   }, [ph, n]);
 
-  /* Curăță sirena la ieșirea din pagină */
+  /* Clean up siren when leaving page */
   useEffect(() => () => hush(), []);
 
   const begin = () => {
-    setN(5); setPin(''); setPh('count');
+    setN(3); setPin(''); setSentAlert(null); setPh('count');
     navigator.vibrate?.([300, 200, 300, 200, 300]);
     try {
       const c = new AudioContext();
@@ -99,7 +102,7 @@ export default function SosPage({ uid, pos, onShare }) {
 
   const savePins = async () => {
     if (a.length < 4 || b.length < 4 || a === b)
-      return alert('Alege două PIN-uri diferite, de cel puțin 4 cifre.');
+      return alert('Choose two different PINs of at least 4 digits.');
     const v = { ok: await sha(a), duress: await sha(b) };
     localStorage.setItem('pins', JSON.stringify(v));
     setPins(v);
@@ -107,31 +110,37 @@ export default function SosPage({ uid, pos, onShare }) {
 
   const check = async () => {
     const h = await sha(pin);
-    if (h === pins.ok)          { hush(); setPh('idle'); }
-    else if (h === pins.duress) { fire('duress'); setPh('idle'); }
-    else                        { setPin(''); alert('PIN greșit.'); }
+    if (h === pins.ok) {
+      hush(); setPh('idle');
+    } else if (h === pins.duress) {
+      // Duress PIN: silently fire SOS, appear to cancel
+      fire();
+      setPh('idle');
+    } else {
+      setPin(''); alert('Wrong PIN.');
+    }
   };
 
-  const call = <a className="sos-call" href="tel:112">Sună 112</a>;
+  const call = <a className="sos-call" href="tel:112">Call 112</a>;
 
-  /* Prima deschidere: setarea PIN-urilor */
+  /* First open: set up PINs */
   if (!pins) {
     return (
       <div className="sos-page">
         <div className="sos-content">
-          <h2>Setează PIN-urile</h2>
+          <h2>Set up PINs</h2>
           <input
-            type="password" inputMode="numeric" placeholder="PIN pentru anulare"
+            type="password" inputMode="numeric" placeholder="Cancel PIN"
             value={a} onChange={(e) => setA(e.target.value)}
           />
           <input
-            type="password" inputMode="numeric" placeholder="PIN de constrângere"
+            type="password" inputMode="numeric" placeholder="Duress PIN"
             value={b} onChange={(e) => setB(e.target.value)}
           />
           <small className="sos-note">
-            PIN-ul de constrângere arată alerta ca anulată, dar o trimite discret.
+            The duress PIN makes the alert appear cancelled but sends it silently.
           </small>
-          <button className="b" onClick={savePins}>Salvează PIN-urile</button>
+          <button className="b" onClick={savePins}>Save PINs</button>
         </div>
       </div>
     );
@@ -150,13 +159,13 @@ export default function SosPage({ uid, pos, onShare }) {
       <div className="sos-content">
         {ph === 'idle' && (
           <>
-            <button className="sos-btn" onClick={begin} aria-label="Trimite alertă SOS">
+            <button className="sos-btn" onClick={begin} aria-label="Send SOS alert">
               <SirenIcon />
               SOS
             </button>
             <button className="sos-share" onClick={onShare}>
               <PinIcon />
-              <span>Partajează locația<br />cu lady bugs</span>
+              <span>Share location<br />with lady bugs</span>
             </button>
             {call}
           </>
@@ -165,30 +174,35 @@ export default function SosPage({ uid, pos, onShare }) {
         {ph === 'count' && (
           <>
             <div className="sos-count">{n}</div>
-            <p>Alerta pleacă la 0. Introdu PIN-ul ca să anulezi.</p>
+            <p>Alert sends at 0. Enter your PIN to cancel.</p>
             <input
               type="password" inputMode="numeric"
               value={pin} onChange={(e) => setPin(e.target.value)}
             />
-            <button className="b" onClick={check}>Anulează alerta</button>
+            <button className="b" onClick={check}>Cancel alert</button>
           </>
         )}
 
         {ph === 'sent' && (
           <>
-            <h2>Alerta a fost înregistrată</h2>
-            <p>Dacă ești în pericol, sună acum la 112.</p>
+            <h2>Alert sent</h2>
+            {sentAlert && (
+              <p style={{ fontSize: '0.85rem', color: '#555' }}>
+                Alert ID: {sentAlert.id} · Status: {sentAlert.status}
+              </p>
+            )}
+            <p>If you are in danger, call 112 now.</p>
             {call}
-            <button className="g" onClick={() => setPh('idle')}>Revino</button>
+            <button className="g" onClick={() => setPh('idle')}>Go back</button>
           </>
         )}
 
         {ph === 'fail' && (
           <>
-            <h2>Alerta nu a putut fi trimisă</h2>
-            <p>Sună imediat la 112.</p>
+            <h2>Alert could not be sent</h2>
+            <p>Call 112 immediately.</p>
             {call}
-            <button className="b" onClick={begin}>Încearcă din nou</button>
+            <button className="b" onClick={begin}>Try again</button>
           </>
         )}
       </div>

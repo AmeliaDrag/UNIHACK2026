@@ -149,3 +149,17 @@
   background: #222;
 }
 .active-pick { border-color: #c62828 !important; color: #c62828 !important; }
+
+/* Route warning and note boxes */
+.rt-warning {
+  background: #2a1800; color: #fbbf24;
+  padding: 8px 12px; border-radius: 10px;
+  font-size: .82rem; margin-bottom: 4px;
+  border-left: 3px solid #fbbf24;
+}
+.rt-note {
+  background: #111; color: #9a9db8;
+  padding: 8px 12px; border-radius: 10px;
+  font-size: .82rem; margin-bottom: 4px;
+  border-left: 3px solid #444;
+}
