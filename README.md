@@ -1,3 +1,7 @@
+## Hackathon write-up
+
+[Read how we built Buburu in 48 hours on DEV](https://dev.to/ameliadrag/buburu-a-womens-safety-app-built-in-48-hours-born-from-a-walk-we-never-forgot-4j9m)
+
 # Buburu
 
 A safety-first walking app. It finds the safest walking route (it avoids areas reported as dangerous),
