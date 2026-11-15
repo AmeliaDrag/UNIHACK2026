@@ -16,6 +16,9 @@ public record UserUpdateDTO(
                 regexp = "^\\+?[0-9]{9,15}$",
                 message = "Invalid phone number"
         )
-        String phoneNumber
-
+        String phoneNumber,
+        @Pattern(regexp = "^#[0-9a-fA-F]{6}$", message = "Invalid color")
+        String wingColor,
+        @Pattern(regexp = "^#[0-9a-fA-F]{6}$", message = "Invalid color")
+        String dotColor
 ) {}

@@ -1,11 +1,10 @@
 import { createRoot } from 'react-dom/client';
-import { Auth0Provider } from '@auth0/auth0-react';
+import { Auth0Provider, useAuth0 } from '@auth0/auth0-react';
+import { useEffect, useState } from 'react';
 import { missingVars, config } from './config';
-import { api } from './api';
 import App from './App';
-import { useState } from 'react';
 
-/** Full-screen error shown when required env vars are absent. */
+// ── ConfigError: shown when required env vars are missing ────────────────────
 function ConfigError({ missing }) {
   return (
     <div style={{
@@ -13,10 +12,10 @@ function ConfigError({ missing }) {
       fontFamily: 'system-ui, sans-serif', padding: '24px', textAlign: 'center',
     }}>
       <div>
-        <h1 style={{ fontSize: '1.4rem', marginBottom: '12px' }}>Missing configuration</h1>
+        <h1 style={{ fontSize: '1.4rem', marginBottom: '12px' }}>Configurare lipsă</h1>
         <p style={{ color: '#666', marginBottom: '16px' }}>
-          The app cannot start. Add the variables below to your <code>.env</code> file
-          and restart the dev server.
+          Aplicația nu poate porni. Adaugă variabilele de mai jos în fișierul{' '}
+          <code>.env</code> și repornește serverul.
         </p>
         <ul style={{ listStyle: 'none', padding: 0, display: 'grid', gap: '6px' }}>
           {missing.map((v) => (
@@ -33,10 +32,7 @@ function ConfigError({ missing }) {
   );
 }
 
-/**
- * On desktop (>600px wide) wraps the app in a phone frame.
- * On a real phone it fills the whole screen.
- */
+// ── PhoneFrame: desktop wrapper that simulates a phone ───────────────────────
 const VIEW_KEY = 'sf-view-mode';
 
 function PhoneFrame({ children }) {
@@ -92,25 +88,10 @@ function PhoneFrame({ children }) {
           box-shadow: 0 80px 0 #333, 0 -80px 0 #333;
         }
         .sf-screen { width: 100%; height: 100%; overflow: hidden; border-radius: 44px; }
-
-        /* Desktop mode: no frame, full screen */
-        .sf-desktop.is-desktop {
-          background: none;
-          padding: 0;
-          display: block;
-          min-height: unset;
-        }
-        .is-desktop .sf-frame {
-          width: 100vw;
-          height: 100dvh;
-          border-radius: 0;
-          box-shadow: none;
-        }
-        .is-desktop .sf-frame::before,
-        .is-desktop .sf-frame::after { display: none; }
+        .sf-desktop.is-desktop { background: none; padding: 0; display: block; min-height: unset; }
+        .is-desktop .sf-frame { width: 100vw; height: 100dvh; border-radius: 0; box-shadow: none; }
+        .is-desktop .sf-frame::before, .is-desktop .sf-frame::after { display: none; }
         .is-desktop .sf-screen { border-radius: 0; }
-
-        /* On real phones: always full screen, hide the toggle */
         @media (max-width: 600px) {
           .sf-desktop { background: none; padding: 0; display: block; min-height: unset; }
           .sf-frame { width: 100vw; height: 100dvh; border-radius: 0; box-shadow: none; }
@@ -118,27 +99,18 @@ function PhoneFrame({ children }) {
           .sf-screen { border-radius: 0; }
           .sf-view-toggle { display: none !important; }
         }
-
         .sf-view-toggle {
-          position: fixed;
-          top: 12px; right: 12px;
-          z-index: 99999;
-          padding: 8px 14px;
-          border: 0; border-radius: 999px;
+          position: fixed; top: 12px; right: 12px; z-index: 99999;
+          padding: 8px 14px; border: 0; border-radius: 999px;
           background: #c62828; color: #fff;
           font: 600 .85rem system-ui, sans-serif;
-          cursor: pointer;
-          box-shadow: 0 2px 10px rgba(0,0,0,.4);
+          cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,.4);
         }
         .sf-view-toggle:hover { background: #e53935; }
       `}</style>
 
-      <button
-        className="sf-view-toggle"
-        onClick={toggle}
-        aria-label="Toggle layout"
-      >
-        {mode === 'phone' ? '🖥 Desktop' : '📱 Phone'}
+      <button className="sf-view-toggle" onClick={toggle} aria-label="Schimbă aspectul">
+        {mode === 'phone' ? '🖥 Desktop' : '📱 Telefon'}
       </button>
 
       <div className={`sf-desktop ${mode === 'desktop' ? 'is-desktop' : ''}`}>
@@ -150,34 +122,48 @@ function PhoneFrame({ children }) {
   );
 }
 
+// AppWithRedirect: Auth0Provider already processes the ?code&state callback.
+function AppWithRedirect() {
+  const { isLoading } = useAuth0();
+
+  // After a failed login Auth0 leaves ?error=...&state=... in the address bar.
+  // A later reload makes the SDK replay a callback whose state is gone, which
+  // shows up as 'Invalid state'. Clean it only once the SDK has finished loading.
+  useEffect(() => {
+    if (isLoading) return;
+    const p = new URLSearchParams(window.location.search);
+    if (p.has('error') && p.has('state')) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [isLoading]);
+
+  return (
+    <PhoneFrame>
+      <App />
+    </PhoneFrame>
+  );
+}
+
+// ── Root render ───────────────────────────────────────────────────────────────
 const root = createRoot(document.getElementById('root'));
 
 if (missingVars.length > 0) {
   root.render(<ConfigError missing={missingVars} />);
-} else if (config.authMode === 'auth') {
-  // Auth mode: wire up token getter after Auth0Provider mounts
-  // api.init is called inside useSession (auth0 mode) via HomePage
+} else {
   root.render(
     <Auth0Provider
       domain={config.auth0Domain}
       clientId={config.auth0ClientId}
-      cacheLocation="localstorage"
       authorizationParams={{
         redirect_uri: window.location.origin,
         audience: config.auth0Audience,
+        scope: 'openid profile email',
       }}
-      onRedirectCallback={() => {}}
+      cacheLocation="localstorage"
+      useRefreshTokens={true}
+      useRefreshTokensFallback={true}
     >
-      <PhoneFrame>
-        <App />
-      </PhoneFrame>
+      <AppWithRedirect />
     </Auth0Provider>
-  );
-} else {
-  // Dev mode: no Auth0Provider needed
-  root.render(
-    <PhoneFrame>
-      <App />
-    </PhoneFrame>
   );
 }

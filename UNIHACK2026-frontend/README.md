@@ -125,11 +125,6 @@ Copiază `.env.example` în `.env` și completează:
 VITE_AUTH0_DOMAIN=       # de la Auth0
 VITE_AUTH0_CLIENT_ID=    # de la Auth0
 VITE_AUTH0_AUDIENCE=     # opțional
-VITE_FB_API_KEY=         # de la Firebase
-VITE_FB_AUTH_DOMAIN=     # de la Firebase
-VITE_FB_PROJECT_ID=      # de la Firebase
-VITE_FB_APP_ID=          # de la Firebase
-VITE_ORS_KEY=            # de la openrouteservice.org (rute reale)
 VITE_GUEST_ENABLED=true  # true în dev, false în producție
 ```
 

@@ -1,12 +1,45 @@
-# SafeWalk (web, React + Firebase + Auth0)
+# Buburu
 
-1. `npm install`, apoi copiază `.env.example` în `.env` și completează valorile.
-2. Firebase: creează un proiect, activează Firestore, copiază configurarea web în `.env`.
-   Regulile în „test mode” sunt TEMPORARE și permit oricui să citească și să scrie. Nu introduce date reale de utilizatoare până nu le înlocuiești.
-3. Auth0: aplicație de tip Single Page Application. Adaugă adresa aplicației la Allowed Callback URLs, Logout URLs și Web Origins.
-   Pentru rolul `moderator`, un Action adaugă rolurile în ID token la claim-ul `https://safewalk.app/roles`.
-4. `npm run dev`.
+A safety-first walking app. It finds the safest walking route (it avoids areas reported as dangerous),
+shows your live position, 24/7 shops, pharmacies and petrol stations, lets you report problems,
+add friends, chat with them and send an SOS.
 
-Trecerea la Spring Boot: tot accesul la date e în `src/api.js`. Păstrezi aceleași funcții și înlocuiești corpul lor cu apeluri `fetch` către REST API, cu token-ul Auth0 în antet.
+## Project layout
 
-SMS: alertele SOS se scriu în colecția `alerts`. Nimic nu trimite SMS încă; trebuie făcut în backend (Spring Boot sau Cloud Function), cu cheile furnizorului doar pe server.
+- `UNIHACK2026-frontend` - React 18, Vite, Leaflet (react-leaflet, leaflet-rotate), Auth0 login
+- `UNIHACK2026-backend` - Spring Boot 4, Java 21, Maven, H2 (stored in a file), Auth0 resource server
+
+## Setup
+
+1. Frontend: copy `UNIHACK2026-frontend/.env.example` to `.env` and fill in your Auth0 values
+   (`VITE_AUTH0_DOMAIN`, `VITE_AUTH0_CLIENT_ID`, `VITE_AUTH0_AUDIENCE`).
+   `VITE_API_BASE_URL` is the backend origin only, for example `http://localhost:8081`.
+2. Backend: copy `UNIHACK2026-backend/.env.example` to `.env` and set `ORS_API_KEY` (OpenRouteService).
+   The key stays in the backend and is never sent to the browser.
+3. Auth0: add `http://localhost:5173` to Allowed Callback URLs, Allowed Logout URLs and Allowed Web Origins,
+   and authorize the application for your API.
+
+## Run
+
+Backend, from `UNIHACK2026-backend` (PowerShell):
+
+```powershell
+$env:FRONTEND_ORIGIN = 'http://localhost:5173'
+.\mvnw.cmd spring-boot:run '-Dspring-boot.run.profiles=auth' '-Dspring-boot.run.arguments=--server.port=8081'
+```
+
+Frontend, from `UNIHACK2026-frontend`:
+
+```powershell
+npm install
+npm run dev
+```
+
+Then open http://localhost:5173 (use `localhost`, not `127.0.0.1`).
+
+## Notes
+
+- The database is a file (`data/` in the backend folder, ignored by git). Delete it to reset all data.
+- Reports expire after 24 hours.
+- The safest route and the chat need a signed-in account.
+- API details: `UNIHACK2026-backend/FRONTEND_API.md`, `AUTH_SETUP.md`, `ROUTING_SETUP.md`.

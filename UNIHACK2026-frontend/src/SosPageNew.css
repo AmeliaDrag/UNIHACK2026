@@ -1,0 +1,154 @@
+/* SosPageNew.css - image.jpeg as the full-screen background, with transparent
+   clickable zones on top of the drawn ladybug and the two pills.
+   Zone percentages were measured on the 900x1600 image. */
+
+/* Fills the area above the bottom navigation (its parent is position: relative) */
+.sos-new-page {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #FFFFFF;
+  overflow: hidden;
+}
+
+/* Background image: stretched to the whole area, no gaps and no cropping */
+.sos-new-bg-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  z-index: 0;
+}
+
+.sos-new-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+}
+
+/* Transparent buttons placed over the drawn elements */
+.sos-new-overlay-btn {
+  position: absolute;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  padding: 0;
+  margin: 0;
+}
+.sos-new-overlay-btn:active { transform: scale(0.97); }
+.sos-new-overlay-btn:focus-visible { outline: 3px solid #DF1B2C; outline-offset: 4px; }
+
+/* Button 1: the red ladybug (SOS) */
+.sos-new-ladybug-zone { top: 24.7%; left: 25.8%; width: 48%; height: 27.2%; border-radius: 50%; }
+/* Button 2: pink pill, share location with Ladybugs */
+.sos-new-pink-zone    { top: 61.4%; left: 12.4%; width: 74.9%; height: 10%;   border-radius: 9999px; }
+/* Button 3: red pill, call 112 */
+.sos-new-red-zone     { top: 74.4%; left: 12.7%; width: 74.7%; height: 8.6%;  border-radius: 9999px; }
+
+/* Modals: PIN setup, countdown, alert sent, alert failed */
+.sos-new-modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 32px 22px;
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  width: min(90%, 400px);
+  box-sizing: border-box;
+  z-index: 10;
+}
+
+.sos-new-countdown {
+  font-size: 110px;
+  font-weight: 900;
+  color: #DF1B2C;
+  line-height: 1;
+  text-shadow: 0 4px 8px rgba(223, 27, 44, 0.2);
+  margin: 0;
+}
+.sos-new-title { font-size: 26px; font-weight: 900; color: #000; text-align: center; margin: 0; }
+.sos-new-title.sos-new-error { color: #DF1B2C; }
+.sos-new-text  { font-size: 17px; font-weight: 600; color: #000; text-align: center; line-height: 1.5; margin: 0; }
+.sos-new-note  { font-size: 13px; font-weight: 500; color: #666; text-align: center; line-height: 1.4; display: block; }
+.sos-new-inline-error {
+  width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 10px;
+  background: rgba(223, 27, 44, .1); border: 1px solid #DF1B2C;
+  color: #9b1220; font-size: 14px; font-weight: 600; text-align: center;
+}
+
+.sos-new-input {
+  width: min(100%, 320px);
+  padding: 14px 20px;
+  font-size: 20px;
+  font-weight: 600;
+  text-align: center;
+  border: 3px solid #000;
+  border-radius: 16px;
+  background-color: #FFF;
+  color: #000;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+.sos-new-input:focus { border-color: #DF1B2C; box-shadow: 0 0 0 4px rgba(223, 27, 44, 0.1); }
+.sos-new-input::placeholder { color: #999; }
+
+.sos-new-action-btn {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  padding: 16px 36px; font-size: 19px; font-weight: 900;
+  border: none; border-radius: 9999px; cursor: pointer;
+  transition: all 0.2s ease; min-width: 220px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+.sos-new-action-btn:active { transform: scale(0.97); }
+.sos-new-red-action { background-color: #DF1B2C; color: #FFF; }
+.sos-new-red-action:hover { background-color: #c91828; box-shadow: 0 6px 16px rgba(223, 27, 44, 0.4); }
+
+.sos-new-cancel-btn, .sos-new-retry-btn, .sos-new-save-btn {
+  padding: 14px 36px; font-size: 18px; font-weight: 700; color: #FFF; background-color: #000;
+  border: none; border-radius: 9999px; cursor: pointer; transition: all 0.2s ease; min-width: 200px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+.sos-new-cancel-btn:hover, .sos-new-retry-btn:hover, .sos-new-save-btn:hover {
+  background-color: #333; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+.sos-new-cancel-btn:active, .sos-new-retry-btn:active, .sos-new-save-btn:active { transform: scale(0.97); }
+
+.sos-new-back-btn {
+  padding: 12px 34px; font-size: 16px; font-weight: 600; color: #000; background-color: #FAD4D8;
+  border: 2px solid #000; border-radius: 9999px; cursor: pointer; transition: all 0.2s ease; min-width: 180px;
+}
+.sos-new-back-btn:hover { background-color: #f8c4c9; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+.sos-new-back-btn:active { transform: scale(0.97); }
+
+.sos-new-cancel-btn:focus-visible, .sos-new-back-btn:focus-visible, .sos-new-retry-btn:focus-visible,
+.sos-new-save-btn:focus-visible, .sos-new-action-btn:focus-visible { outline: 3px solid #DF1B2C; outline-offset: 4px; }
+
+@media (max-width: 480px) {
+  .sos-new-countdown { font-size: 92px; }
+  .sos-new-title { font-size: 23px; }
+  .sos-new-text { font-size: 16px; }
+  .sos-new-modal { padding: 26px 18px; gap: 16px; }
+}
+@media (max-width: 360px) {
+  .sos-new-countdown { font-size: 78px; }
+  .sos-new-title { font-size: 21px; }
+  .sos-new-action-btn { font-size: 16px; padding: 14px 26px; min-width: 180px; }
+}

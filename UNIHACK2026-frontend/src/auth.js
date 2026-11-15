@@ -1,27 +1,24 @@
 /**
- * auth.js — session wrapper with dev-mode bypass, Auth0, and guest mode.
+ * auth.js — session management over Auth0 SDK, with optional guest mode.
  *
- * VITE_AUTH_MODE=dev  → mock session, no Auth0 calls (default)
- * VITE_AUTH_MODE=auth → full Auth0 flow
+ * useSession() → { isLoading, isAuthenticated, user, login, loginSignUp,
+ *                  logout, enterGuest, isGuest, guestEnabled,
+ *                  backendProfile, profileError, profileLoading,
+ *                  showProfilePrompt, dismissProfilePrompt }
  *
- * useSession() returns:
- *   { isLoading, isAuthenticated, isGuest, user, backendProfile,
- *     login, logout, enterGuest, guestEnabled, getAccessToken }
+ * Flow after Auth0 callback:
+ *   1. getAccessTokenSilently() → inject into backendApi via setTokenProvider
+ *   2. GET /api/v1/users/me → store backendProfile
+ *   3. If phoneNumber===null and prompt not seen → set showProfilePrompt=true
  *
- * The exported `useSession` is fixed at module-load time to either the dev
- * or the auth0 implementation. This means it satisfies the Rules of Hooks
- * (the same hook function is called on every render) while never calling
- * useAuth0() in dev mode where Auth0Provider is absent from the tree.
+ * Guest mode: controlled by VITE_GUEST_ENABLED=true.
  */
-import { useEffect, useRef, useState } from 'react';
-import { config } from './config';
-import { api } from './api';
-
-// Auth0 is a static import — the bundle includes it regardless, but
-// useAuth0() is only *called* when authMode === 'auth' (see bottom of file).
 import { useAuth0 } from '@auth0/auth0-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { config } from './config';
+import { backendApi, setTokenProvider, clearTokenProvider } from './api';
 
-// Stable guest ID persisted across page refreshes
+// ── Guest helpers ─────────────────────────────────────────────────────────────
 function getGuestId() {
   let id = localStorage.getItem('guestId');
   if (!id) {
@@ -31,79 +28,153 @@ function getGuestId() {
   return id;
 }
 
-// ── Dev-mode hook (no Auth0) ────────────────────────────────────────────────
-function useDevSession() {
-  const [backendProfile, setBackendProfile] = useState(null);
-  const [profileError,   setProfileError]   = useState(null);
-  const fetched = useRef(false);
-
-  useEffect(() => {
-    if (fetched.current) return;
-    fetched.current = true;
-    api.getMe()
-      .then(setBackendProfile)
-      .catch((e) => setProfileError(e.message));
-  }, []);
-
-  return {
-    isLoading: false,
-    isAuthenticated: true,
-    isGuest: false,
-    user: {
-      sub:   'dev-user',
-      name:  'Dev User',
-      email: 'ana@test.com',
-      'https://safewalk.app/roles': [],
-    },
-    backendProfile,
-    profileError,
-    getAccessToken: async () => null,
-    login:      () => {},
-    logout:     () => {},
-    enterGuest: () => {},
-    guestEnabled: config.guestEnabled,
-  };
+// ── Profile-prompt localStorage key ──────────────────────────────────────────
+function promptKey(sub) {
+  return `profilePromptSeen:${config.auth0Domain}:${sub}`;
 }
 
-// ── Auth0 hook ──────────────────────────────────────────────────────────────
-function useAuth0Session() {
+function hasSeenPrompt(sub) {
+  try { return !!localStorage.getItem(promptKey(sub)); } catch { return true; }
+}
+
+function markPromptSeen(sub) {
+  try { localStorage.setItem(promptKey(sub), '1'); } catch {}
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+export function useSession() {
   const {
-    isLoading,
+    isLoading: auth0Loading,
     isAuthenticated,
     user,
+    error: auth0Error,
     loginWithRedirect,
     logout: auth0Logout,
     getAccessTokenSilently,
   } = useAuth0();
 
-  const [isGuest, setIsGuest] = useState(() => !!localStorage.getItem('guest'));
+  const [isGuest, setIsGuest] = useState(() => config.guestEnabled && !!localStorage.getItem('guest'));
+
+  // Backend state
   const [backendProfile, setBackendProfile] = useState(null);
-  const [profileError,   setProfileError]   = useState(null);
-  const fetched = useRef(false);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileError,   setProfileError]   = useState(null); // { status, message }
+  const [showProfilePrompt, setShowProfilePrompt] = useState(false);
 
-  const getAccessToken = () =>
-    getAccessTokenSilently({
-      authorizationParams: { audience: config.auth0Audience },
-    });
-
-  // Once Auth0 login succeeds, fetch backend profile once
+  // Log the raw Auth0 error so the real cause is visible in the console
   useEffect(() => {
-    if (!isAuthenticated || isGuest || fetched.current) return;
-    fetched.current = true;
-    api.getMe()
-      .then(setBackendProfile)
-      .catch((e) => setProfileError(e.message));
-  }, [isAuthenticated, isGuest]);
+    if (!auth0Error) return;
+    console.error('[auth] Auth0 error:', {
+      error: auth0Error.error,
+      message: auth0Error.message,
+      error_description: auth0Error.error_description,
+    });
+  }, [auth0Error]);
 
-  const logout = () => {
+  // Avoid duplicate /users/me calls
+  const initDoneRef = useRef(false);
+
+  // ── Initialize backend after Auth0 authenticates ─────────────────────────
+  useEffect(() => {
+    if (!isAuthenticated || !user || isGuest) return;
+    if (initDoneRef.current) return;
+    initDoneRef.current = true;
+
+    const init = async () => {
+      setProfileLoading(true);
+      setProfileError(null);
+      try {
+        // 1. Get access token and wire it into backendApi
+        const tokenFn = () =>
+          getAccessTokenSilently({
+            authorizationParams: {
+              audience: config.auth0Audience,
+              scope: 'openid profile email',
+            },
+          });
+        setTokenProvider(tokenFn);
+
+        // 2. Fetch or provision backend profile
+        console.log('[auth] calling GET /api/v1/users/me');
+        const profile = await backendApi.getMe();
+        console.log('[auth] /users/me →', profile);
+        setBackendProfile(profile);
+
+        // 3. Decide whether to show profile prompt
+        if (profile.phoneNumber === null && !hasSeenPrompt(user.sub)) {
+          setShowProfilePrompt(true);
+        }
+      } catch (err) {
+        console.error('[auth] /users/me error:', err);
+        setProfileError({ status: err.status ?? 0, message: err.message, url: err.url, body: err.body });
+        clearTokenProvider();
+        initDoneRef.current = false; // allow retry
+      } finally {
+        setProfileLoading(false);
+      }
+    };
+
+    init();
+  }, [isAuthenticated, user, isGuest, getAccessTokenSilently]);
+
+  // ── Actions ───────────────────────────────────────────────────────────────
+  const login = useCallback(() => {
+    loginWithRedirect({
+      authorizationParams: {
+        redirect_uri: window.location.origin,
+        audience: config.auth0Audience,
+        scope: 'openid profile email',
+      },
+    });
+  }, [loginWithRedirect]);
+
+  const loginSignUp = useCallback(() => {
+    loginWithRedirect({
+      authorizationParams: {
+        redirect_uri: window.location.origin,
+        audience: config.auth0Audience,
+        scope: 'openid profile email',
+        screen_hint: 'signup',
+      },
+    });
+  }, [loginWithRedirect]);
+
+  const logout = useCallback(() => {
     if (isGuest) {
       localStorage.removeItem('guest');
       setIsGuest(false);
-    } else {
-      auth0Logout({ logoutParams: { returnTo: window.location.origin } });
+      return;
     }
-  };
+    // Clear account-specific state
+    setBackendProfile(null);
+    setProfileError(null);
+    setShowProfilePrompt(false);
+    initDoneRef.current = false;
+    clearTokenProvider();
+    // Clear session-scoped items (not profilePromptSeen — that's a persistent UI pref)
+    localStorage.removeItem('sid');
+    auth0Logout({ logoutParams: { returnTo: window.location.origin } });
+  }, [isGuest, auth0Logout]);
 
+  const enterGuest = useCallback(() => {
+    localStorage.setItem('guest', '1');
+    setIsGuest(true);
+  }, []);
+
+  const dismissProfilePrompt = useCallback((saved = false) => {
+    if (user) markPromptSeen(user.sub);
+    setShowProfilePrompt(false);
+    if (saved && backendProfile) {
+      // backendProfile was already updated by the caller via updateBackendProfile
+    }
+  }, [user, backendProfile]);
+
+  const updateBackendProfile = useCallback((profile) => {
+    setBackendProfile(profile);
+  }, []);
+
+  // ── Guest session ─────────────────────────────────────────────────────────
   if (isGuest) {
     return {
       isLoading: false,
@@ -111,41 +182,44 @@ function useAuth0Session() {
       isGuest: true,
       user: {
         sub:   getGuestId(),
-        name:  'Guest',
+        name:  'Vizitator',
         email: null,
         'https://safewalk.app/roles': [],
       },
       backendProfile: null,
+      profileLoading: false,
       profileError:   null,
-      getAccessToken: async () => null,
+      authError:      null,
+      showProfilePrompt: false,
       login:      () => {},
+      loginSignUp: () => {},
       logout,
       enterGuest: () => {},
+      dismissProfilePrompt: () => {},
+      updateBackendProfile,
       guestEnabled: config.guestEnabled,
     };
   }
 
+  // ── Loading: Auth0 SDK initialising ───────────────────────────────────────
+  const isLoading = auth0Loading || (isAuthenticated && profileLoading && !backendProfile && !profileError);
+
   return {
     isLoading,
-    isAuthenticated,
+    isAuthenticated: isAuthenticated && !!backendProfile,
     isGuest: false,
     user: isAuthenticated ? user : null,
     backendProfile,
+    profileLoading,
     profileError,
-    getAccessToken,
-    login:      () => loginWithRedirect(),
+    authError: auth0Error ? auth0Error.message : null,
+    showProfilePrompt,
+    login,
+    loginSignUp,
     logout,
-    enterGuest: () => {
-      localStorage.setItem('guest', '1');
-      setIsGuest(true);
-    },
+    enterGuest,
+    dismissProfilePrompt,
+    updateBackendProfile,
     guestEnabled: config.guestEnabled,
   };
 }
-
-// ── Public export ────────────────────────────────────────────────────────────
-// config.authMode is a constant (read from import.meta.env at build time),
-// so this ternary is resolved once at module load — the same function is
-// always returned, satisfying the Rules of Hooks.
-export const useSession =
-  config.authMode === 'auth' ? useAuth0Session : useDevSession;
