@@ -1,0 +1,393 @@
+/* ════════════════════════════════════════════════════════════════════════
+   SosPageNew.css - Using image.jpeg as background with transparent overlays
+   ════════════════════════════════════════════════════════════════════════ */
+
+.sos-new-page {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  background-color: #FFFFFF;
+  overflow: hidden;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   Background Image - Full Screen Fill
+   ──────────────────────────────────────────────────────────────────────── */
+
+.sos-new-bg-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill; /* Stretch to fill exactly, matching mockup */
+  pointer-events: none; /* Allow clicks to pass through to buttons */
+  user-select: none;
+  z-index: 0;
+}
+
+.sos-new-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   Transparent Overlay Buttons - Positioned over mockup elements
+   ──────────────────────────────────────────────────────────────────────── */
+
+.sos-new-overlay-btn {
+  position: absolute;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sos-new-overlay-btn:active {
+  transform: scale(0.97);
+}
+
+/* Visual feedback for development/debugging (remove in production) */
+.sos-new-overlay-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Focus visible for accessibility */
+.sos-new-overlay-btn:focus-visible {
+  outline: 3px solid #DF1B2C;
+  outline-offset: 4px;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   Button 1: Ladybug SOS Trigger Zone (center red ladybug)
+   ──────────────────────────────────────────────────────────────────────── */
+
+.sos-new-ladybug-zone {
+  top: 22%;
+  left: 22%;
+  width: 56%;
+  height: 32%;
+  border-radius: 50%; /* Circular clickable area */
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   Button 2: Pink Pill Zone (Partajează locația cu Ladybugs)
+   ──────────────────────────────────────────────────────────────────────── */
+
+.sos-new-pink-zone {
+  top: 59%;
+  left: 11%;
+  width: 78%;
+  height: 11%;
+  border-radius: 9999px; /* Pill shape */
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   Button 3: Red Pill Zone (Sună la 112)
+   ──────────────────────────────────────────────────────────────────────── */
+
+.sos-new-red-zone {
+  top: 72%;
+  left: 11%;
+  width: 78%;
+  height: 11%;
+  border-radius: 9999px; /* Pill shape */
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   Modal Overlays (Countdown, Sent, Fail, PIN Setup)
+   ──────────────────────────────────────────────────────────────────────── */
+
+.sos-new-modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 40px 24px;
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  max-width: 90%;
+  min-width: min(85%, 400px);
+  z-index: 10;
+  backdrop-filter: blur(10px);
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   Countdown Display
+   ──────────────────────────────────────────────────────────────────────── */
+
+.sos-new-countdown {
+  font-size: 120px;
+  font-weight: 900;
+  color: #DF1B2C;
+  line-height: 1;
+  text-shadow: 0 4px 8px rgba(223, 27, 44, 0.2);
+  margin: 0;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   Text & Typography
+   ──────────────────────────────────────────────────────────────────────── */
+
+.sos-new-title {
+  font-size: 28px;
+  font-weight: 900;
+  color: #000000;
+  text-align: center;
+  margin: 0 0 8px 0;
+}
+
+.sos-new-title.sos-new-error {
+  color: #DF1B2C;
+}
+
+.sos-new-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #000000;
+  text-align: center;
+  max-width: 400px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.sos-new-note {
+  font-size: 14px;
+  font-weight: 500;
+  color: #666666;
+  text-align: center;
+  max-width: 320px;
+  line-height: 1.4;
+  display: block;
+  margin-top: -8px;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   Input Fields
+   ──────────────────────────────────────────────────────────────────────── */
+
+.sos-new-input {
+  width: min(90%, 320px);
+  padding: 16px 24px;
+  font-size: 20px;
+  font-weight: 600;
+  text-align: center;
+  border: 3px solid #000000;
+  border-radius: 16px;
+  background-color: #FFFFFF;
+  color: #000000;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.sos-new-input:focus {
+  border-color: #DF1B2C;
+  box-shadow: 0 0 0 4px rgba(223, 27, 44, 0.1);
+}
+
+.sos-new-input::placeholder {
+  color: #999999;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   Action Buttons (in modals)
+   ──────────────────────────────────────────────────────────────────────── */
+
+.sos-new-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 18px 40px;
+  font-size: 20px;
+  font-weight: 900;
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 240px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.sos-new-action-btn:active {
+  transform: scale(0.97);
+}
+
+.sos-new-red-action {
+  background-color: #DF1B2C;
+  color: #FFFFFF;
+}
+
+.sos-new-red-action:hover {
+  background-color: #c91828;
+  box-shadow: 0 6px 16px rgba(223, 27, 44, 0.4);
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   Cancel, Retry, Save Buttons
+   ──────────────────────────────────────────────────────────────────────── */
+
+.sos-new-cancel-btn,
+.sos-new-retry-btn,
+.sos-new-save-btn {
+  padding: 16px 40px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #FFFFFF;
+  background-color: #000000;
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 200px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.sos-new-cancel-btn:hover,
+.sos-new-retry-btn:hover,
+.sos-new-save-btn:hover {
+  background-color: #333333;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.sos-new-cancel-btn:active,
+.sos-new-retry-btn:active,
+.sos-new-save-btn:active {
+  transform: scale(0.97);
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   Back Button
+   ──────────────────────────────────────────────────────────────────────── */
+
+.sos-new-back-btn {
+  padding: 14px 36px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #000000;
+  background-color: #FAD4D8;
+  border: 2px solid #000000;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 180px;
+}
+
+.sos-new-back-btn:hover {
+  background-color: #f8c4c9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.sos-new-back-btn:active {
+  transform: scale(0.97);
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   Responsive Adjustments
+   ──────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 480px) {
+  .sos-new-countdown {
+    font-size: 96px;
+  }
+
+  .sos-new-title {
+    font-size: 24px;
+  }
+
+  .sos-new-text {
+    font-size: 16px;
+  }
+
+  .sos-new-modal {
+    padding: 32px 20px;
+    gap: 20px;
+  }
+
+  .sos-new-action-btn {
+    font-size: 18px;
+    padding: 16px 32px;
+    min-width: 200px;
+  }
+}
+
+@media (max-width: 360px) {
+  .sos-new-countdown {
+    font-size: 80px;
+  }
+
+  .sos-new-title {
+    font-size: 22px;
+  }
+
+  .sos-new-text {
+    font-size: 15px;
+  }
+
+  .sos-new-modal {
+    padding: 24px 16px;
+    gap: 16px;
+  }
+
+  .sos-new-action-btn {
+    font-size: 16px;
+    padding: 14px 28px;
+    min-width: 180px;
+  }
+
+  .sos-new-cancel-btn,
+  .sos-new-retry-btn,
+  .sos-new-save-btn {
+    font-size: 16px;
+    padding: 14px 32px;
+    min-width: 160px;
+  }
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   Accessibility - Focus States
+   ──────────────────────────────────────────────────────────────────────── */
+
+.sos-new-cancel-btn:focus-visible,
+.sos-new-back-btn:focus-visible,
+.sos-new-retry-btn:focus-visible,
+.sos-new-save-btn:focus-visible,
+.sos-new-action-btn:focus-visible {
+  outline: 3px solid #DF1B2C;
+  outline-offset: 4px;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   Development Helper - Show overlay boundaries (comment out in production)
+   ──────────────────────────────────────────────────────────────────────── */
+
+/*
+.sos-new-ladybug-zone {
+  background: rgba(255, 0, 0, 0.1);
+}
+
+.sos-new-pink-zone {
+  background: rgba(250, 212, 216, 0.2);
+}
+
+.sos-new-red-zone {
+  background: rgba(223, 27, 44, 0.2);
+}
+*/

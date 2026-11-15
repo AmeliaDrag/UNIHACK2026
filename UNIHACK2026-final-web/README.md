@@ -1,0 +1,42 @@
+# Buburu
+
+A safety-first walking app: safest routes that avoid reported danger zones, live location,
+24/7 shops on the map, reports from other users, friends and in-app chat.
+
+- **UNIHACK2026-frontend**: React, Vite, Leaflet, Auth0 login
+- **UNIHACK2026-backend/backend**: Spring Boot 4, Java 21, H2 (in memory), Auth0 resource server
+
+## Setup
+
+1. Copy `UNIHACK2026-frontend/.env.example` to `.env` and fill in your Auth0 values
+   (`VITE_AUTH0_DOMAIN`, `VITE_AUTH0_CLIENT_ID`, `VITE_AUTH0_AUDIENCE`).
+   `VITE_API_BASE_URL` is the backend origin only, for example `http://localhost:8081`.
+2. Copy `UNIHACK2026-backend/backend/.env.example` to `.env` and set `ORS_API_KEY`
+   (an OpenRouteService key). It lives only in the backend and is never sent to the browser.
+3. In Auth0, add `http://localhost:5173` to Allowed Callback URLs, Allowed Logout URLs and
+   Allowed Web Origins, and authorize the application for the API.
+
+## Run
+
+Backend, from `UNIHACK2026-backend/backend` (PowerShell):
+
+```powershell
+$env:FRONTEND_ORIGIN = 'http://localhost:5173'
+.\mvnw.cmd spring-boot:run '-Dspring-boot.run.profiles=auth' '-Dspring-boot.run.arguments=--server.port=8081'
+```
+
+Frontend, from `UNIHACK2026-frontend`:
+
+```powershell
+npm install
+npm run dev
+```
+
+Then open http://localhost:5173.
+
+## Notes
+
+- The database is in memory: users, friends, messages and reports are erased on every backend restart.
+- Reports expire after 24 hours.
+- The routing key is used only by the backend; the safest route needs a signed-in account.
+- More detail: `UNIHACK2026-backend/backend/FRONTEND_API.md`, `AUTH_SETUP.md` and `ROUTING_SETUP.md`.

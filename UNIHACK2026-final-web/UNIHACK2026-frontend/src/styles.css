@@ -1,0 +1,156 @@
+/* ═══ Themes ═══ */
+:root, [data-theme="dark"] {
+  --bg:#10111f;--fg:#eceefb;--mut:#9a9db8;--card:#1c1e33;--ac:#c62828;--ac2:#fff;--red:#ef5350;
+  --bg-panel:#1a1a2e;--bg-card:#1c1e33;--text-primary:#eceefb;--text-secondary:#9a9db8;
+  --border:#333;--border-strong:#000;
+}
+[data-theme="light"] {
+  --bg:#f6f7fb;--fg:#14162b;--mut:#6a6d85;--card:#e9ebf4;--ac:#dc2626;--ac2:#111;--red:#c62828;
+  --bg-panel:#fff;--bg-card:#f4f4f5;--text-primary:#18181b;--text-secondary:#52525b;
+  --border:#e4e4e7;--border-strong:#18181b;
+}
+[data-theme="pink"] {
+  --bg:#fce4ec;--fg:#1a0010;--mut:#c2185b;--card:#ffd6e7;--ac:#c2185b;--ac2:#880e4f;--red:#e91e63;
+  --bg-panel:#fff0f5;--bg-card:#ffd6e7;--text-primary:#1a0010;--text-secondary:#6d2042;
+  --border:#f48fb1;--border-strong:#880e4f;
+}
+*{box-sizing:border-box}html,body,#root{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font:16px/1.45 system-ui,sans-serif}
+.app{display:flex;flex-direction:column;height:100%;margin:0 auto;padding-top:env(safe-area-inset-top)}
+header{display:flex;justify-content:space-between;align-items:center;padding:8px 16px}
+main{flex:1;min-height:0;overflow:auto;position:relative}
+.map{position:absolute;inset:0}.track .map{position:relative;flex:1}.track{height:100%;display:flex;flex-direction:column}
+nav{display:flex;border-top:1px solid var(--card);padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;padding:14px 0;border:0;background:none;color:var(--mut);font:inherit}
+nav .on{color:var(--ac);font-weight:700}
+.p{padding:16px;display:grid;gap:10px;align-content:start}.card{background:var(--card);padding:12px;border-radius:12px}
+input,select,textarea{font:inherit;padding:10px;border-radius:10px;border:1px solid var(--mut);background:var(--bg);color:var(--fg);width:100%}
+.b{padding:12px;border:0;border-radius:12px;background:var(--ac);color:var(--bg);font:inherit;font-weight:700}
+.g{display:inline-block;padding:8px 12px;border:1px solid var(--mut);border-radius:10px;background:none;color:var(--fg);font:inherit;margin:4px 6px 0 0;text-decoration:none}
+.sos{width:200px;height:200px;border-radius:50%;border:0;background:var(--red);color:#fff;font-size:44px;font-weight:700;margin:24px auto;display:block}
+.big{font-size:96px;text-align:center}.c,.login{display:grid;place-items:center;align-content:center;gap:12px;height:100%;text-align:center;padding:24px}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+
+/* ── Theme switch button ── */
+.theme-switch {
+  position: fixed;
+  top: 14px; left: 14px;
+  z-index: 99999;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,.3);
+  transition: border-color .15s, transform .12s;
+}
+.theme-switch:hover { border-color: var(--ac); transform: scale(1.1) rotate(15deg); }
+
+/* ── Hide scrollbar everywhere ── */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* ── Chat ── */
+.chat-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
+.chat-list{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:8px}
+.chat-empty,.chat-error{text-align:center;color:var(--mut);font-size:.9rem;margin:auto}
+.chat-error{color:var(--red)}
+.chat-msg{display:flex;flex-direction:column;max-width:78%;gap:2px}
+.chat-msg.mine{align-self:flex-end;align-items:flex-end}
+.chat-author{font-size:.75rem;color:var(--mut);padding:0 4px}
+.chat-bubble{background:var(--card);padding:9px 13px;border-radius:16px;border-bottom-left-radius:4px;word-break:break-word;line-height:1.4}
+.chat-msg.mine .chat-bubble{background:var(--ac);color:var(--bg);border-bottom-left-radius:16px;border-bottom-right-radius:4px}
+.chat-time{font-size:.7rem;color:var(--mut);padding:0 4px}
+.chat-input-row{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--card);align-items:flex-end}
+.chat-input{flex:1;resize:none;border-radius:20px;padding:10px 14px;line-height:1.4;min-height:42px;max-height:120px;overflow-y:auto}
+.chat-send{width:42px;height:42px;border-radius:50%;padding:0;flex-shrink:0;font-size:18px}
+
+/* ── Route tab ── */
+.route-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
+.route-controls{overflow-y:auto;max-height:52%;border-bottom:1px solid var(--card)}
+.route-map{flex:1;min-height:0}
+.route-row{display:grid;grid-template-columns:60px 1fr;gap:8px;align-items:start}
+.route-label{padding-top:10px;font-size:.85rem;color:var(--mut);font-weight:600}
+.route-field{display:grid;gap:4px}
+.route-value{padding:10px;border:1px solid var(--mut);border-radius:10px;min-height:42px;font-size:.9rem;word-break:break-word}
+.route-actions{display:flex;flex-wrap:wrap;gap:0}
+.route-hint{background:var(--card);padding:10px 12px;border-radius:10px;font-size:.85rem}
+.route-error{color:var(--red);font-size:.9rem}
+.route-info{background:var(--card);padding:10px 12px;border-radius:10px;font-size:.85rem}
+.active-pick{border-color:var(--ac);color:var(--ac)}
+.mut{color:var(--mut)}
+
+/* ── Direction picker (AI) ── */
+.dir-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+}
+.dir-label {
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.dir-ai-hint {
+  font-size: .78rem;
+  color: var(--ac);
+  font-weight: 700;
+}
+.dir-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+}
+.dir-btn {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  border: 2px solid var(--border);
+  background: var(--card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color .15s, background .15s, color .15s, transform .1s;
+}
+.dir-btn:hover { border-color: var(--ac); color: var(--ac); }
+.dir-btn:active { transform: scale(0.95); }
+.dir-btn-active {
+  border-color: var(--ac) !important;
+  background: var(--ac) !important;
+  color: #fff !important;
+}
+.dir-or {
+  font-size: .78rem;
+  color: var(--text-muted);
+}
+.dir-compass {
+  font-size: .72rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+.dir-badge {
+  display: inline-block;
+  font-size: .72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--ac);
+  color: #fff;
+  margin-left: 6px;
+}
