@@ -1,0 +1,282 @@
+/* ═══════════════════════════════════════════════════
+   AccountPage.css — temă ladybug (roșu + negru)
+   Toate clasele cu prefix lb-
+   ═══════════════════════════════════════════════════ */
+
+.lb-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  background: var(--bg);
+}
+
+/* ── Avatar section ── */
+.lb-avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0 4px;
+}
+.lb-avatar {
+  width: 96px;
+  height: 96px;
+  filter: drop-shadow(0 4px 12px rgba(198, 40, 40, .35));
+}
+.lb-badge {
+  background: #c62828;
+  color: #fff;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 3px 12px;
+  border-radius: 20px;
+}
+.lb-username {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--fg);
+}
+
+.lb-sub {
+  color: var(--mut);
+  text-align: center;
+  font-size: .95rem;
+}
+
+/* ── Secțiuni (cards) ── */
+.lb-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--card);
+  border-radius: 16px;
+  padding: 16px;
+}
+.lb-section-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--fg);
+  border-left: 4px solid #c62828;
+  padding-left: 10px;
+}
+.lb-sub-text {
+  font-size: .82rem;
+  color: var(--mut);
+  margin-top: -4px;
+}
+
+/* ── Inputs ── */
+.lb-input {
+  width: 100%;
+  font: inherit;
+  font-size: .92rem;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1.5px solid var(--mut);
+  background: var(--bg);
+  color: var(--fg);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color .15s;
+}
+.lb-input:focus {
+  border-color: #c62828;
+}
+.lb-input::placeholder { color: var(--mut); }
+
+textarea.lb-input { resize: vertical; }
+
+.lb-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: .88rem;
+  color: var(--mut);
+  cursor: pointer;
+}
+.lb-check input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  accent-color: #c62828;
+}
+
+/* ── Butoane ── */
+.lb-btn {
+  width: 100%;
+  padding: 13px;
+  border: 0;
+  border-radius: 12px;
+  background: #c62828;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  font-size: .95rem;
+  cursor: pointer;
+  transition: background .15s, transform .1s;
+}
+.lb-btn:hover  { background: #a81f1f; transform: translateY(-1px); }
+.lb-btn:active { transform: none; }
+
+.lb-btn.outline {
+  background: none;
+  border: 2px solid #111;
+  color: #111;
+}
+.lb-btn.outline:hover { background: rgba(0,0,0,.05); }
+
+.lb-btn-sm {
+  display: inline-block;
+  padding: 6px 12px;
+  border: 1px solid var(--mut);
+  border-radius: 8px;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  font-size: .82rem;
+  margin: 4px 6px 0 0;
+  cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+.lb-btn-sm:hover { border-color: #c62828; color: #c62828; }
+
+/* ── Card raportare ── */
+.lb-card {
+  background: var(--bg);
+  border: 1px solid var(--mut);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 8px;
+}
+.lb-card p { margin: 4px 0; }
+.lb-card small { color: var(--mut); }
+
+/* ── Campuri profil ── */
+.lb-field-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.lb-field-accent {
+  width: 4px;
+  height: 38px;
+  border-radius: 2px;
+  background: #c62828;
+  flex-shrink: 0;
+}
+.lb-field-label {
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--mut);
+  width: 40px;
+  flex-shrink: 0;
+}
+
+/* Telefon: selector prefix + input ── */
+.lb-phone-group {
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  border: 1.5px solid var(--mut);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg);
+  transition: border-color .15s;
+}
+.lb-phone-group:focus-within { border-color: #c62828; }
+
+.lb-country-select {
+  flex-shrink: 0;
+  font: inherit;
+  font-size: .85rem;
+  padding: 10px 8px 10px 10px;
+  border: none;
+  background: var(--bg);
+  color: var(--fg);
+  outline: none;
+  cursor: pointer;
+  width: 86px;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  padding-right: 20px;
+}
+.lb-phone-divider {
+  width: 1px;
+  background: var(--mut);
+  flex-shrink: 0;
+  margin: 6px 0;
+}
+.lb-phone-input {
+  flex: 1;
+  font: inherit;
+  font-size: .92rem;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  color: var(--fg);
+  outline: none;
+  min-width: 0;
+}
+.lb-phone-input::placeholder { color: var(--mut); }
+
+/* ── Prieteni ── */
+.lb-friend-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.lb-empty {
+  text-align: center;
+  color: var(--mut);
+  font-size: .88rem;
+  padding: 12px 0;
+}
+.lb-friend-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg);
+  border: 1px solid var(--mut);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+.lb-friend-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.lb-friend-info b { font-size: .92rem; color: var(--fg); }
+.lb-friend-info small { font-size: .78rem; color: var(--mut); }
+.lb-friend-remove {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--mut);
+  background: none;
+  color: var(--mut);
+  font-size: .8rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color .15s, color .15s;
+}
+.lb-friend-remove:hover {
+  border-color: #c62828;
+  color: #c62828;
+  background: rgba(198,40,40,.08);
+}
+.lb-friend-add {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* ── Dark mode pentru outline ── */
+@media (prefers-color-scheme: dark) {
+  .lb-btn.outline { border-color: #eee; color: #eee; }
+  .lb-btn.outline:hover { background: rgba(255,255,255,.05); }
+}
